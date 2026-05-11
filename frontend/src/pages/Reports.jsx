@@ -1,0 +1,220 @@
+// src/pages/Reports.jsx
+// ----------------------------------------------------------------------------
+// Reports hub. Three cards:
+//   1. Inventory snapshot (no filters)
+//   2. Low stock alert (no filters)
+//   3. Transaction history (date range + type filters with quick presets)
+// ----------------------------------------------------------------------------
+
+import { useState } from 'react';
+import {
+  FileSpreadsheet,
+  AlertTriangle,
+  ArrowLeftRight,
+  CalendarDays,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+
+import { reportApi } from '../api/reportApi';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import ReportCard from '../components/reports/ReportCard';
+
+// Helper: today's date in YYYY-MM-DD (for the transaction date inputs)
+const today = () => new Date().toISOString().slice(0, 10);
+
+const startOfWeek = () => {
+  const d = new Date();
+  const day = d.getDay() || 7; // make Sunday = 7
+  d.setDate(d.getDate() - day + 1); // back to Monday
+  return d.toISOString().slice(0, 10);
+};
+
+const startOfMonth = () => {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1)
+    .toISOString()
+    .slice(0, 10);
+};
+
+export default function Reports() {
+  // ---- Loading flags per card ----
+  const [loadingInv, setLoadingInv] = useState(false);
+  const [loadingLow, setLoadingLow] = useState(false);
+  const [loadingTx, setLoadingTx] = useState(false);
+
+  // ---- Transaction filter state ----
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [txType, setTxType] = useState('');
+
+  // ---- Handlers ----
+  const downloadInventory = async () => {
+    setLoadingInv(true);
+    try {
+      await reportApi.inventory();
+      toast.success('Inventory report downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingInv(false);
+    }
+  };
+
+  const downloadLowStock = async () => {
+    setLoadingLow(true);
+    try {
+      await reportApi.lowStock();
+      toast.success('Low stock alert downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingLow(false);
+    }
+  };
+
+  const downloadTransactions = async () => {
+    setLoadingTx(true);
+    try {
+      await reportApi.transactions({
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        type: txType || undefined,
+      });
+      toast.success('Transaction report downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingTx(false);
+    }
+  };
+
+  // Quick-range presets
+  const setRange = (preset) => {
+    const t = today();
+    if (preset === 'today') {
+      setStartDate(t);
+      setEndDate(t);
+    } else if (preset === 'week') {
+      setStartDate(startOfWeek());
+      setEndDate(t);
+    } else if (preset === 'month') {
+      setStartDate(startOfMonth());
+      setEndDate(t);
+    } else if (preset === 'all') {
+      setStartDate('');
+      setEndDate('');
+    }
+  };
+
+  return (
+    <DashboardLayout title="Reports">
+      <div className="mb-5">
+        <h2 className="text-xl font-bold text-slate-900">Reports</h2>
+        <p className="text-sm text-slate-500">
+          Download printable PDF reports for your records or to share with stakeholders.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* Card 1: Inventory snapshot */}
+        <ReportCard
+          icon={FileSpreadsheet}
+          title="Inventory Snapshot"
+          description="All active products with current stock levels, unit prices, and total stock value."
+          accent="blue"
+          loading={loadingInv}
+          onDownload={downloadInventory}
+        />
+
+        {/* Card 2: Low stock */}
+        <ReportCard
+          icon={AlertTriangle}
+          title="Low Stock Alert"
+          description="Items at or below their reorder threshold, with suggested purchase quantities."
+          accent="amber"
+          loading={loadingLow}
+          onDownload={downloadLowStock}
+        />
+
+        {/* Card 3: Transactions — with filters */}
+        <ReportCard
+          icon={ArrowLeftRight}
+          title="Transaction History"
+          description="Stock movements (in/out) with full audit trail."
+          accent="purple"
+          loading={loadingTx}
+          onDownload={downloadTransactions}
+        >
+          <div className="space-y-2.5">
+            {/* Quick presets */}
+            <div className="flex flex-wrap gap-1">
+              <PresetBtn onClick={() => setRange('today')}>Today</PresetBtn>
+              <PresetBtn onClick={() => setRange('week')}>This Week</PresetBtn>
+              <PresetBtn onClick={() => setRange('month')}>This Month</PresetBtn>
+              <PresetBtn onClick={() => setRange('all')}>All Time</PresetBtn>
+            </div>
+
+            {/* Date range */}
+            <div className="flex items-center gap-2">
+              <CalendarDays size={14} className="text-slate-400" />
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              />
+              <span className="text-xs text-slate-400">→</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              />
+            </div>
+
+            {/* Type */}
+            <select
+              value={txType}
+              onChange={(e) => setTxType(e.target.value)}
+              className="block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+            >
+              <option value="">All movement types</option>
+              <option value="IN">Stock IN only</option>
+              <option value="OUT">Stock OUT only</option>
+            </select>
+          </div>
+        </ReportCard>
+      </div>
+
+      {/* Tip box */}
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <h3 className="text-sm font-semibold text-slate-700">💡 Tips</h3>
+        <ul className="mt-2 space-y-1 text-sm text-slate-600">
+          <li>
+            • Reports open as PDF downloads — check your browser's Downloads folder.
+          </li>
+          <li>
+            • The Inventory Snapshot is great for periodic stock-takes.
+          </li>
+          <li>
+            • Use the Low Stock Alert when planning purchase orders.
+          </li>
+          <li>
+            • Filter the Transaction History by month for monthly reconciliation.
+          </li>
+        </ul>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function PresetBtn({ children, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+    >
+      {children}
+    </button>
+  );
+}

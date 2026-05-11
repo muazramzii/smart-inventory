@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+
+# Generated PDFs from testing
+*.pdf
+
+# Logs
+*.log
+
+# Dependencies (just in case)
+node_modules/
