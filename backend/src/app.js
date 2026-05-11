@@ -18,9 +18,19 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
+// Allow multiple frontend URLs (local dev + production)
+const allowedOrigins = config.cors.clientUrl
+  .split(',')
+  .map((s) => s.trim());
+
 app.use(
   cors({
-    origin: config.cors.clientUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, healthchecks)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );

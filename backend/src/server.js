@@ -6,10 +6,10 @@
 const app = require('./app');
 const config = require('./config/env');
 
-const server = app.listen(config.port, () => {
-  console.log(`🚀 Server running on http://localhost:${config.port} (${config.nodeEnv})`);
+// Bind to 0.0.0.0 so cloud platforms (Render, Railway, etc.) can route traffic in.
+const server = app.listen(config.port, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${config.port} (${config.nodeEnv})`);
 });
-
 function shutdown(signal) {
   console.log(`\n${signal} received. Shutting down gracefully...`);
   server.close(() => {

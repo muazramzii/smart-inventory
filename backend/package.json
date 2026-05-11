@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Smart Inventory Management System - Backend API",
   "main": "src/server.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
