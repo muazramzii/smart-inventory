@@ -14,6 +14,7 @@ import {
   X,
   Boxes,
   User,
+  ScrollText,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: '/categories',   label: 'Categories',   icon: Tags },
   { to: '/suppliers',    label: 'Suppliers',    icon: Truck },
   { to: '/reports',      label: 'Reports',      icon: FileText },
+  { to: '/audit-logs',   label: 'Audit Logs',   icon: ScrollText },
 ];
 
 const ACCOUNT_ITEMS = [
