@@ -16,6 +16,7 @@ import Suppliers from '../pages/Suppliers';
 import Profile from '../pages/Profile';
 import AuditLogs from '../pages/AuditLogs';
 import Users from '../pages/Users';
+import UserDetail from '../pages/UserDetail';
 import PrivateRoute from './PrivateRoute';
 
 export default function AppRoutes() {
@@ -34,6 +35,7 @@ export default function AppRoutes() {
       <Route path="/profile"      element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/audit-logs"   element={<PrivateRoute requiredRole="admin"><AuditLogs /></PrivateRoute>} />
       <Route path="/users"        element={<PrivateRoute requiredRole="admin"><Users /></PrivateRoute>} />
+      <Route path="/users/:id"    element={<PrivateRoute requiredRole="admin"><UserDetail /></PrivateRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
