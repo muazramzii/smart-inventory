@@ -369,23 +369,32 @@ const ReportController = {
         { label: 'Total Events', value: String(logs.length) },
       ]);
 
-      drawTable(doc, {
-        columns: [
-          { label: 'Date', key: 'created_at', width: 90,
-            format: (v) => new Date(v).toLocaleDateString('en-US', {
-              year: '2-digit', month: 'short', day: 'numeric',
-              hour: '2-digit', minute: '2-digit',
-            }) },
-          { label: 'User', key: 'user_name', width: 80, format: (v) => v || '-' },
-          { label: 'Action', key: 'action', width: 110 },
-          { label: 'Entity', key: 'entity', width: 90,
-            format: (v, row) => (v ? `${v} #${row.entity_id}` : '-') },
-          { label: 'IP', key: 'ip_address', width: 70, format: (v) => v || '-' },
-          { label: 'Details', key: 'details', width: 160,
-            format: (v) => (v ? JSON.stringify(v) : '') },
-        ],
-        rows: logs,
-      });
+      if (logs.length === 0) {
+        doc
+          .moveDown(2)
+          .font('Helvetica')
+          .fontSize(11)
+          .fillColor('#64748b')
+          .text('No audit log entries match the selected filters.', { align: 'center' });
+      } else {
+        drawTable(doc, {
+          columns: [
+            { label: 'Date', key: 'created_at', width: 90,
+              format: (v) => new Date(v).toLocaleDateString('en-US', {
+                year: '2-digit', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+              }) },
+            { label: 'User', key: 'user_name', width: 80, format: (v) => v || '-' },
+            { label: 'Action', key: 'action', width: 110 },
+            { label: 'Entity', key: 'entity', width: 90,
+              format: (v, row) => (v ? `${v} #${row.entity_id}` : '-') },
+            { label: 'IP', key: 'ip_address', width: 70, format: (v) => v || '-' },
+            { label: 'Details', key: 'details', width: 160,
+              format: (v) => (v ? JSON.stringify(v) : '') },
+          ],
+          rows: logs,
+        });
+      }
 
       drawFooter(doc);
       doc.end();
