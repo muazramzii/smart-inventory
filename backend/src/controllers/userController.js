@@ -153,6 +153,13 @@ const UserController = {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
+      if (String(req.user.id) === String(id)) {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot reset your own password here — use Change Password instead',
+        });
+      }
+
       const password_hash = await hashPassword(newPassword);
       await UserModel.updatePassword(id, password_hash);
 
