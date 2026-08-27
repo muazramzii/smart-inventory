@@ -91,15 +91,13 @@ export default function TransactionDetail() {
             label="Quantity"
             value={`${isIn ? '+' : '−'}${formatNumber(tx.quantity)}`}
           />
-          <InfoRow label="Unit Price" value={formatCurrency(tx.unit_price)} />
+          <InfoRow
+            label="Unit Price"
+            value={tx.unit_price != null ? formatCurrency(tx.unit_price) : '—'}
+          />
           <InfoRow label="Recorded By" value={tx.user_name} />
           <InfoRow label="Supplier" value={tx.supplier_name || '—'} />
-          <InfoRow
-            label="Note"
-            value={
-              <span className="line-clamp-1 max-w-[300px]">{tx.note || '—'}</span>
-            }
-          />
+          <InfoRow label="Note" value={tx.note || '—'} />
         </dl>
 
         <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
