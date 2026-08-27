@@ -5,6 +5,7 @@
 
 const TransactionModel = require('../models/transactionModel');
 const SupplierModel = require('../models/supplierModel');
+const { recordAudit } = require('../utils/auditLogger');
 
 const TransactionController = {
   async list(req, res, next) {
@@ -72,6 +73,16 @@ const TransactionController = {
       });
 
       const tx = await TransactionModel.findById(result.id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: 'STOCK_IN',
+        entity: 'transaction',
+        entityId: result.id,
+        details: { product_id, quantity, newStock: result.newStock },
+      });
+
       res.status(201).json({
         success: true,
         data: tx,
@@ -97,6 +108,16 @@ const TransactionController = {
       });
 
       const tx = await TransactionModel.findById(result.id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: 'STOCK_OUT',
+        entity: 'transaction',
+        entityId: result.id,
+        details: { product_id, quantity, newStock: result.newStock },
+      });
+
       res.status(201).json({
         success: true,
         data: tx,
@@ -110,6 +131,16 @@ const TransactionController = {
   async remove(req, res, next) {
     try {
       const result = await TransactionModel.remove(req.params.id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: 'TRANSACTION_REVERSE',
+        entity: 'transaction',
+        entityId: req.params.id,
+        details: result,
+      });
+
       res.json({
         success: true,
         message: 'Transaction reversed and deleted',
