@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Products from '../pages/Products';
+import ProductDetail from '../pages/ProductDetail';
 import Transactions from '../pages/Transactions';
 import Reports from '../pages/Reports';
 import Categories from '../pages/Categories';
@@ -23,6 +24,7 @@ export default function AppRoutes() {
 
       <Route path="/"             element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/products"     element={<PrivateRoute><Products /></PrivateRoute>} />
+      <Route path="/products/:id" element={<PrivateRoute><ProductDetail /></PrivateRoute>} />
       <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
       <Route path="/categories"   element={<PrivateRoute><Categories /></PrivateRoute>} />
       <Route path="/suppliers"    element={<PrivateRoute><Suppliers /></PrivateRoute>} />

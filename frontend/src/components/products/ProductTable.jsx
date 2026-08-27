@@ -4,6 +4,7 @@
 // because tables are awful on mobile.
 // ----------------------------------------------------------------------------
 
+import { Link } from 'react-router-dom';
 import { Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import Button from '../common/Button';
 import { formatCurrency, formatNumber } from '../../utils/format';
@@ -41,7 +42,12 @@ export default function ProductTable({
                     <span className="font-mono text-xs">{p.sku}</span>
                   </Td>
                   <Td>
-                    <div className="font-medium text-slate-900">{p.name}</div>
+                    <Link
+                      to={`/products/${p.id}`}
+                      className="font-medium text-slate-900 hover:text-brand-600 hover:underline"
+                    >
+                      {p.name}
+                    </Link>
                     {p.description && (
                       <div className="truncate text-xs text-slate-500">
                         {p.description}
@@ -115,7 +121,12 @@ export default function ProductTable({
             <li key={p.id} className="px-4 py-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900">{p.name}</p>
+                  <Link
+                    to={`/products/${p.id}`}
+                    className="block font-medium text-slate-900 hover:text-brand-600 hover:underline"
+                  >
+                    {p.name}
+                  </Link>
                   <p className="font-mono text-xs text-slate-500">{p.sku}</p>
                   {p.category_name && (
                     <p className="mt-0.5 text-xs text-slate-500">

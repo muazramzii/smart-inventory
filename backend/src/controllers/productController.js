@@ -50,7 +50,8 @@ const ProductController = {
       if (!product) {
         return res.status(404).json({ success: false, message: 'Product not found' });
       }
-      res.json({ success: true, data: product });
+      const stats = await ProductModel.getMovementStats(req.params.id);
+      res.json({ success: true, data: { ...product, stats } });
     } catch (err) {
       next(err);
     }
