@@ -4,8 +4,8 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Inbox, AlertTriangle } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, Inbox, AlertTriangle, PackageX } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { productApi } from '../api/productApi';
@@ -14,6 +14,7 @@ import { transactionApi } from '../api/transactionApi';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
+import Button from '../components/common/Button';
 import ProductStatsCards from '../components/products/ProductStatsCards';
 import TransactionTable from '../components/transactions/TransactionTable';
 import { formatCurrency, formatNumber } from '../utils/format';
@@ -24,17 +25,23 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setNotFound(false);
       try {
         const p = await productApi.getOne(id);
         setProduct(p);
         const { data } = await transactionApi.list({ productId: id, limit: 20 });
         setTransactions(data);
       } catch (err) {
-        toast.error(err.response?.data?.message || 'Failed to load product');
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          toast.error(err.response?.data?.message || 'Failed to load product');
+        }
       } finally {
         setLoading(false);
       }
@@ -52,11 +59,38 @@ export default function ProductDetail() {
     );
   }
 
+  if (notFound || !product) {
+    return (
+      <DashboardLayout title="Product Not Found">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <EmptyState
+            icon={PackageX}
+            title="Product not found"
+            description="This product may have been removed, or the link is incorrect."
+            action={
+              <Link to="/products">
+                <Button variant="secondary" icon={ArrowLeft}>
+                  Back to Products
+                </Button>
+              </Link>
+            }
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   const isLowStock = product.current_stock <= product.low_stock_threshold;
 
   return (
     <DashboardLayout title={product.name}>
       <div className="mb-4">
+        <Link
+          to="/products"
+          className="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand-600"
+        >
+          <ArrowLeft size={14} /> Back to Products
+        </Link>
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-xl font-bold text-slate-900">{product.name}</h2>
           {isLowStock && (
