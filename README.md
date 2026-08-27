@@ -20,7 +20,7 @@ A modern, production-quality inventory management web application designed for s
 - 🔄 **Stock movement tracking** — Atomic stock-in/stock-out with row-level locking (no race conditions)
 - ⚠️ **Low-stock alerts** — Per-product thresholds with reorder suggestions
 - 📋 **Transaction history** — Complete audit trail with date/type filters and reversal capability
-- 📄 **PDF report exports** — Inventory snapshot, low-stock alerts, transaction history with date ranges
+- 📄 **PDF & CSV report exports** — Inventory snapshot, low-stock alerts, transaction history with date ranges
 - 🏷️ **Categories management** — Organize products with friendly product counts
 - 🚚 **Suppliers management** — Track contacts, click-to-call/email links
 - 👤 **User profile** — Account info, password change with strength meter
