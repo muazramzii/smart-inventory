@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, Package, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -29,11 +30,12 @@ const PAGE_SIZE = 10;
 
 export default function Products() {
   const { isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
 
   // ---- Filter state ----
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState(null);
-  const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [lowStockOnly, setLowStockOnly] = useState(() => searchParams.get('lowStockOnly'));
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search, 300);
 
