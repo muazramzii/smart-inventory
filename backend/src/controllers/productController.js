@@ -6,6 +6,7 @@
 const ProductModel = require('../models/productModel');
 const CategoryModel = require('../models/categoryModel');
 const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const ProductController = {
   async list(req, res, next) {
@@ -83,8 +84,8 @@ const ProductController = {
       recordAudit({
         req,
         userId: req.user.id,
-        action: 'PRODUCT_CREATE',
-        entity: 'product',
+        action: AUDIT_ACTIONS.PRODUCT_CREATE,
+        entity: AUDIT_ENTITIES.PRODUCT,
         entityId: id,
         details: { sku: created.sku, name: created.name },
       });
@@ -129,8 +130,8 @@ const ProductController = {
       recordAudit({
         req,
         userId: req.user.id,
-        action: 'PRODUCT_UPDATE',
-        entity: 'product',
+        action: AUDIT_ACTIONS.PRODUCT_UPDATE,
+        entity: AUDIT_ENTITIES.PRODUCT,
         entityId: id,
         details: { fields: Object.keys(req.body) },
       });
@@ -153,8 +154,8 @@ const ProductController = {
       recordAudit({
         req,
         userId: req.user.id,
-        action: 'PRODUCT_DELETE',
-        entity: 'product',
+        action: AUDIT_ACTIONS.PRODUCT_DELETE,
+        entity: AUDIT_ENTITIES.PRODUCT,
         entityId: id,
         details: { sku: existing.sku, name: existing.name },
       });

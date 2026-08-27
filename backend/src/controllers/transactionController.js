@@ -6,6 +6,7 @@
 const TransactionModel = require('../models/transactionModel');
 const SupplierModel = require('../models/supplierModel');
 const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const TransactionController = {
   async list(req, res, next) {
@@ -77,8 +78,8 @@ const TransactionController = {
       recordAudit({
         req,
         userId: req.user.id,
-        action: 'STOCK_IN',
-        entity: 'transaction',
+        action: AUDIT_ACTIONS.STOCK_IN,
+        entity: AUDIT_ENTITIES.TRANSACTION,
         entityId: result.id,
         details: { product_id, quantity, newStock: result.newStock },
       });
@@ -112,8 +113,8 @@ const TransactionController = {
       recordAudit({
         req,
         userId: req.user.id,
-        action: 'STOCK_OUT',
-        entity: 'transaction',
+        action: AUDIT_ACTIONS.STOCK_OUT,
+        entity: AUDIT_ENTITIES.TRANSACTION,
         entityId: result.id,
         details: { product_id, quantity, newStock: result.newStock },
       });
@@ -135,8 +136,8 @@ const TransactionController = {
       recordAudit({
         req,
         userId: req.user.id,
-        action: 'TRANSACTION_REVERSE',
-        entity: 'transaction',
+        action: AUDIT_ACTIONS.TRANSACTION_REVERSE,
+        entity: AUDIT_ENTITIES.TRANSACTION,
         entityId: req.params.id,
         details: result,
       });

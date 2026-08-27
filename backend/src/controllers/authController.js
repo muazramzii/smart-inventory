@@ -7,6 +7,7 @@ const UserModel = require('../models/userModel');
 const { comparePassword, hashPassword } = require('../utils/hash');
 const { signToken } = require('../utils/jwt');
 const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const AuthController = {
   async login(req, res, next) {
@@ -34,8 +35,8 @@ const AuthController = {
       recordAudit({
         req,
         userId: user.id,
-        action: 'LOGIN',
-        entity: 'user',
+        action: AUDIT_ACTIONS.LOGIN,
+        entity: AUDIT_ENTITIES.USER,
         entityId: user.id,
       });
 
@@ -103,8 +104,8 @@ const AuthController = {
       recordAudit({
         req,
         userId: user.id,
-        action: 'CHANGE_PASSWORD',
-        entity: 'user',
+        action: AUDIT_ACTIONS.CHANGE_PASSWORD,
+        entity: AUDIT_ENTITIES.USER,
         entityId: user.id,
       });
 
