@@ -31,6 +31,7 @@ export default function LowStockBell() {
   }, []);
 
   const count = products.length;
+  const badgeCount = count > 99 ? '99+' : count;
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -42,7 +43,7 @@ export default function LowStockBell() {
         <Bell size={20} />
         {count > 0 && (
           <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-            {count}
+            {badgeCount}
           </span>
         )}
       </button>
@@ -63,6 +64,7 @@ export default function LowStockBell() {
                 <li key={p.id}>
                   <Link
                     to={`/products/${p.id}`}
+                    onClick={() => setOpen(false)}
                     className="block px-4 py-2.5 text-sm hover:bg-slate-50"
                   >
                     <p className="flex items-center gap-1.5 font-medium text-slate-900">
@@ -80,6 +82,7 @@ export default function LowStockBell() {
 
           <Link
             to="/products?lowStockOnly=true"
+            onClick={() => setOpen(false)}
             className="block border-t border-slate-100 px-4 py-2.5 text-center text-sm font-medium text-brand-600 hover:bg-slate-50"
           >
             View All
