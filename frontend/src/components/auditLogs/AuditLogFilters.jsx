@@ -14,6 +14,9 @@ const ACTIONS = [
   'STOCK_IN',
   'STOCK_OUT',
   'TRANSACTION_REVERSE',
+  'USER_CREATE',
+  'USER_UPDATE',
+  'USER_DEACTIVATE',
 ];
 
 const ENTITIES = ['user', 'product', 'transaction'];
