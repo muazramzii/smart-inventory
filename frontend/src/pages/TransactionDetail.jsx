@@ -9,6 +9,7 @@ import { ArrowDownToLine, ArrowUpFromLine, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { transactionApi } from '../api/transactionApi';
+import { useAuth } from '../hooks/useAuth';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
@@ -17,6 +18,7 @@ import { formatCurrency, formatNumber, formatDateTime } from '../utils/format';
 
 export default function TransactionDetail() {
   const { id } = useParams();
+  const { isAdmin } = useAuth();
 
   const [tx, setTx] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -100,18 +102,20 @@ export default function TransactionDetail() {
           <InfoRow label="Note" value={tx.note || '—'} />
         </dl>
 
-        <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={RotateCcw}
-            onClick={handleReverse}
-            loading={reversing}
-            className="text-red-600 hover:bg-red-50"
-          >
-            Reverse Transaction
-          </Button>
-        </div>
+        {isAdmin && (
+          <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={RotateCcw}
+              onClick={handleReverse}
+              loading={reversing}
+              className="text-red-600 hover:bg-red-50"
+            >
+              Reverse Transaction
+            </Button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
