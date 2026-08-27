@@ -1,7 +1,7 @@
 // src/api/reportApi.js
 // ----------------------------------------------------------------------------
-// Report PDF downloads. Each call:
-//   1. Fetches the PDF as a binary Blob (responseType: 'blob' — important!)
+// Report downloads (PDF and CSV). Each call:
+//   1. Fetches the file as a binary Blob (responseType: 'blob' — important!)
 //   2. Creates a temporary object URL
 //   3. Triggers a click on a hidden <a> to start the download
 //   4. Cleans up the object URL afterwards
@@ -16,7 +16,7 @@
 
 import api from './axios';
 
-async function downloadPdf(url, params, filename) {
+async function downloadBlob(url, params, filename, mimeType) {
   const response = await api.get(url, {
     params,
     responseType: 'blob', // critical — don't parse as JSON/text
@@ -24,7 +24,7 @@ async function downloadPdf(url, params, filename) {
 
   // The server sets Content-Disposition with a filename, but parsing it
   // reliably in browsers is messy. We use a sensible default.
-  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const blob = new Blob([response.data], { type: mimeType });
   const objectUrl = window.URL.createObjectURL(blob);
 
   const link = document.createElement('a');
@@ -36,6 +36,14 @@ async function downloadPdf(url, params, filename) {
 
   // Free the blob URL after a tick so the download can start
   setTimeout(() => window.URL.revokeObjectURL(objectUrl), 100);
+}
+
+function downloadPdf(url, params, filename) {
+  return downloadBlob(url, params, filename, 'application/pdf');
+}
+
+function downloadCsv(url, params, filename) {
+  return downloadBlob(url, params, filename, 'text/csv');
 }
 
 const stamp = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -66,6 +74,34 @@ export const reportApi = {
         ...(type && { type }),
       },
       `transactions-report-${stamp()}.pdf`
+    );
+  },
+
+  inventoryCsv() {
+    return downloadCsv(
+      '/reports/inventory.csv',
+      {},
+      `inventory-report-${stamp()}.csv`
+    );
+  },
+
+  lowStockCsv() {
+    return downloadCsv(
+      '/reports/low-stock.csv',
+      {},
+      `low-stock-alert-${stamp()}.csv`
+    );
+  },
+
+  transactionsCsv({ startDate, endDate, type } = {}) {
+    return downloadCsv(
+      '/reports/transactions.csv',
+      {
+        ...(startDate && { startDate }),
+        ...(endDate && { endDate }),
+        ...(type && { type }),
+      },
+      `transactions-report-${stamp()}.csv`
     );
   },
 };
