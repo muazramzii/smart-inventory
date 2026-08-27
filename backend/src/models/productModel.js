@@ -160,6 +160,20 @@ const ProductModel = {
     return result.affectedRows > 0;
   },
 
+  async getMovementStats(id) {
+    const [[stats]] = await db.query(
+      `SELECT
+         COALESCE(SUM(CASE WHEN type = 'IN'  THEN quantity ELSE 0 END), 0) AS totalIn,
+         COALESCE(SUM(CASE WHEN type = 'OUT' THEN quantity ELSE 0 END), 0) AS totalOut,
+         COUNT(*) AS transactionCount,
+         MAX(created_at) AS lastMovementAt
+       FROM transactions
+       WHERE product_id = ?`,
+      [id]
+    );
+    return stats;
+  },
+
   async findLowStock() {
     const [rows] = await db.query(
       `SELECT p.id, p.sku, p.name, p.unit,
