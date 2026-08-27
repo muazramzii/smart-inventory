@@ -31,12 +31,29 @@ export default function AuditLogFilters({
   onStartDateChange,
   endDate,
   onEndDateChange,
+  userId,
+  onUserIdChange,
+  users = [],
   disabled = false,
 }) {
   const hasFilters = action || entity || startDate || endDate;
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <select
+        value={userId || ''}
+        onChange={(e) => onUserIdChange(e.target.value || null)}
+        disabled={disabled}
+        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <option value="">All users</option>
+        {users.map((u) => (
+          <option key={u.id} value={u.id}>
+            {u.name}
+          </option>
+        ))}
+      </select>
+
       <select
         value={action || ''}
         onChange={(e) => onActionChange(e.target.value || null)}
