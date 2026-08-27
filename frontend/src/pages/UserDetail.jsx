@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 
 import { userApi } from '../api/userApi';
 import { auditLogApi } from '../api/auditLogApi';
+import { useAuth } from '../hooks/useAuth';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
@@ -21,6 +22,8 @@ import { formatDate } from '../utils/format';
 
 export default function UserDetail() {
   const { id } = useParams();
+  const { user: currentUser } = useAuth();
+  const isSelf = String(currentUser.id) === String(id);
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -123,28 +126,36 @@ export default function UserDetail() {
         </dl>
 
         <div className="mt-4 flex flex-wrap justify-end gap-1 border-t border-slate-100 pt-4">
-          <Button size="sm" variant="secondary" icon={Pencil} onClick={() => setFormOpen(true)}>
-            Edit
-          </Button>
-          {user.is_active && (
-            <Button size="sm" variant="ghost" icon={KeyRound} onClick={() => setResetOpen(true)}>
-              Reset Password
-            </Button>
+          {isSelf ? (
+            <p className="text-xs italic text-slate-400">
+              Manage your own account from Profile
+            </p>
+          ) : (
+            <>
+              <Button size="sm" variant="secondary" icon={Pencil} onClick={() => setFormOpen(true)}>
+                Edit
+              </Button>
+              {user.is_active && (
+                <Button size="sm" variant="ghost" icon={KeyRound} onClick={() => setResetOpen(true)}>
+                  Reset Password
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={user.is_active ? UserX : UserCheck}
+                onClick={toggleActive}
+                loading={deactivating}
+                className={
+                  user.is_active
+                    ? 'text-red-600 hover:bg-red-50'
+                    : 'text-green-600 hover:bg-green-50'
+                }
+              >
+                {user.is_active ? 'Deactivate' : 'Activate'}
+              </Button>
+            </>
           )}
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={user.is_active ? UserX : UserCheck}
-            onClick={toggleActive}
-            loading={deactivating}
-            className={
-              user.is_active
-                ? 'text-red-600 hover:bg-red-50'
-                : 'text-green-600 hover:bg-green-50'
-            }
-          >
-            {user.is_active ? 'Deactivate' : 'Activate'}
-          </Button>
         </div>
       </div>
 
