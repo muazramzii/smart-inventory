@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { scorePassword, STRENGTH_LABELS, strengthColorClass } from '../../utils/passwordStrength';
 
 function emptyForm() {
   return { name: '', email: '', password: '', role: 'staff' };
@@ -124,17 +125,35 @@ export default function UserFormModal({
         />
 
         {mode === 'create' && (
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            required
-            value={form.password}
-            onChange={(e) => setField('password', e.target.value)}
-            error={errors.password}
-            helper="At least 8 characters"
-            disabled={submitting}
-          />
+          <div>
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              required
+              value={form.password}
+              onChange={(e) => setField('password', e.target.value)}
+              error={errors.password}
+              helper="At least 8 chars, with uppercase, lowercase, and a number"
+              disabled={submitting}
+            />
+            {form.password && (
+              <div className="mt-2">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className={`h-full transition-all ${strengthColorClass(scorePassword(form.password))}`}
+                    style={{ width: `${(scorePassword(form.password) / 5) * 100}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Strength:{' '}
+                  <span className="font-medium">
+                    {STRENGTH_LABELS[scorePassword(form.password)]}
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         <div>

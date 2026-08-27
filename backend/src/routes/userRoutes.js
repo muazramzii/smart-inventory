@@ -30,7 +30,11 @@ router.post(
   [
     body('name').trim().isLength({ min: 1, max: 100 }).withMessage('Name is required (max 100)'),
     body('email').trim().isEmail().withMessage('Valid email required'),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    body('password')
+      .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+      .matches(/[A-Z]/).withMessage('Password must contain an uppercase letter')
+      .matches(/[a-z]/).withMessage('Password must contain a lowercase letter')
+      .matches(/[0-9]/).withMessage('Password must contain a number'),
     body('role').isIn(['admin', 'staff']).withMessage('Role must be admin or staff'),
   ],
   validate,
