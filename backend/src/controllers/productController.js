@@ -7,6 +7,7 @@ const ProductModel = require('../models/productModel');
 const CategoryModel = require('../models/categoryModel');
 const { recordAudit } = require('../utils/auditLogger');
 const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
+const { parseCsv } = require('../utils/csvHelpers');
 
 const ProductController = {
   async list(req, res, next) {
@@ -162,6 +163,38 @@ const ProductController = {
       });
 
       res.json({ success: true, message: 'Product deactivated' });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async bulkImport(req, res, next) {
+    try {
+      const { csv } = req.body;
+      const rows = parseCsv(csv);
+
+      const results = { created: 0, errors: [] };
+      let categoryId = null;
+
+      for (const row of rows) {
+        if (row['Category']) {
+          const cat = await CategoryModel.findByName(row['Category']);
+          if (cat) categoryId = cat.id;
+        }
+
+        await ProductModel.create({
+          sku: row['SKU'],
+          name: row['Name'],
+          category_id: categoryId,
+          unit: row['Unit'] || 'pcs',
+          unit_price: Number(row['Unit Price']) || 0,
+          current_stock: Number(row['Stock']) || 0,
+          low_stock_threshold: Number(row['Low Stock Threshold']) || 10,
+        });
+        results.created++;
+      }
+
+      res.json({ success: true, ...results });
     } catch (err) {
       next(err);
     }
