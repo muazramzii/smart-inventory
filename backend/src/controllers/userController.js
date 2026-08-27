@@ -33,6 +33,15 @@ const UserController = {
   async create(req, res, next) {
     try {
       const { name, email, password, role } = req.body;
+
+      const existingUser = await UserModel.findByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          message: `A user with email "${email}" already exists`,
+        });
+      }
+
       const password_hash = await hashPassword(password);
       const id = await UserModel.create({ name, email, password_hash, role });
       const created = await UserModel.findById(id);
@@ -60,6 +69,30 @@ const UserController = {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
+      const isSelf = String(req.user.id) === String(id);
+      if (isSelf && req.body.role && req.body.role !== 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot change your own role',
+        });
+      }
+      if (isSelf && req.body.is_active === false) {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot deactivate your own account',
+        });
+      }
+
+      if (req.body.email && req.body.email !== existing.email) {
+        const dup = await UserModel.findByEmail(req.body.email);
+        if (dup && dup.id !== existing.id) {
+          return res.status(409).json({
+            success: false,
+            message: `A user with email "${req.body.email}" already exists`,
+          });
+        }
+      }
+
       await UserModel.update(id, req.body);
       const updated = await UserModel.findById(id);
 
@@ -84,6 +117,13 @@ const UserController = {
       const existing = await UserModel.findById(id);
       if (!existing) {
         return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      if (String(req.user.id) === String(id)) {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot deactivate your own account',
+        });
       }
 
       await UserModel.update(id, { is_active: false });
