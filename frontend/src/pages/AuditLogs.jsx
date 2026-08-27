@@ -49,8 +49,10 @@ export default function AuditLogs() {
   useEffect(() => {
     userApi.list()
       .then(setUsers)
-      .catch(() => {});
+      .catch(() => toast.error('Failed to load users for filter'));
   }, []);
+
+  const filteredUser = users.find((u) => String(u.id) === String(userId));
 
   const loadLogs = async () => {
     setLoading(true);
@@ -88,6 +90,12 @@ export default function AuditLogs() {
         <h2 className="text-xl font-bold text-slate-900">Audit Logs</h2>
         <p className="text-sm text-slate-500">
           {pagination.total} {pagination.total === 1 ? 'event' : 'events'} recorded
+          {filteredUser && (
+            <>
+              {' '}— showing activity for{' '}
+              <span className="font-medium text-slate-700">{filteredUser.name}</span>
+            </>
+          )}
         </p>
       </div>
 
