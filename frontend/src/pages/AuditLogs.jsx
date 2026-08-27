@@ -4,10 +4,12 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ScrollText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { auditLogApi } from '../api/auditLogApi';
+import { userApi } from '../api/userApi';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
@@ -20,17 +22,37 @@ import AuditLogTable from '../components/auditLogs/AuditLogTable';
 const PAGE_SIZE = 20;
 
 export default function AuditLogs() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [action, setAction] = useState(null);
   const [entity, setEntity] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [userId, setUserId] = useState(() => searchParams.get('userId'));
   const [page, setPage] = useState(1);
+
+  // Keep ?userId= in sync so refreshing or sharing the current URL preserves
+  // whichever user is being viewed, not just the one the page was opened with.
+  useEffect(() => {
+    setSearchParams(userId ? { userId } : {}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const [logs, setLogs] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    userApi.list()
+      .then(setUsers)
+      .catch(() => toast.error('Failed to load users for filter'));
+  }, []);
+
+  const filteredUser = users.find((u) => String(u.id) === String(userId));
 
   const loadLogs = async () => {
     setLoading(true);
@@ -40,6 +62,7 @@ export default function AuditLogs() {
         entity: entity || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        userId: userId || undefined,
         page,
         limit: PAGE_SIZE,
       });
@@ -55,11 +78,11 @@ export default function AuditLogs() {
   useEffect(() => {
     loadLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [action, entity, startDate, endDate, page]);
+  }, [action, entity, startDate, endDate, userId, page]);
 
   useEffect(() => {
     setPage(1);
-  }, [action, entity, startDate, endDate]);
+  }, [action, entity, startDate, endDate, userId]);
 
   return (
     <DashboardLayout title="Audit Logs">
@@ -67,6 +90,12 @@ export default function AuditLogs() {
         <h2 className="text-xl font-bold text-slate-900">Audit Logs</h2>
         <p className="text-sm text-slate-500">
           {pagination.total} {pagination.total === 1 ? 'event' : 'events'} recorded
+          {filteredUser && (
+            <>
+              {' '}— showing activity for{' '}
+              <span className="font-medium text-slate-700">{filteredUser.name}</span>
+            </>
+          )}
         </p>
       </div>
 
@@ -81,6 +110,9 @@ export default function AuditLogs() {
             onStartDateChange={setStartDate}
             endDate={endDate}
             onEndDateChange={setEndDate}
+            userId={userId}
+            onUserIdChange={setUserId}
+            users={users}
             disabled={loading}
           />
         </div>
@@ -92,7 +124,7 @@ export default function AuditLogs() {
             icon={ScrollText}
             title="No audit logs found"
             description={
-              action || entity || startDate || endDate
+              action || entity || startDate || endDate || userId
                 ? 'Try adjusting your filters.'
                 : 'System activity will appear here as it happens.'
             }
