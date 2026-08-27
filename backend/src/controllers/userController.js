@@ -156,6 +156,15 @@ const UserController = {
       const password_hash = await hashPassword(newPassword);
       await UserModel.updatePassword(id, password_hash);
 
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.USER_PASSWORD_RESET,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: id,
+        details: { name: existing.name, email: existing.email },
+      });
+
       res.json({ success: true, message: 'Password reset successfully' });
     } catch (err) {
       next(err);
