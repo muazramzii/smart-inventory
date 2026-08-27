@@ -209,6 +209,14 @@ const ProductController = {
         }
       }
 
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.PRODUCT_BULK_IMPORT,
+        entity: AUDIT_ENTITIES.PRODUCT,
+        details: { created: results.created, failed: results.errors.length },
+      });
+
       res.json({ success: true, ...results });
     } catch (err) {
       next(err);
