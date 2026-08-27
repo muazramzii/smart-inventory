@@ -18,25 +18,25 @@ export default function ProductStatsCards({ stats, unit }) {
     {
       icon: ArrowDownToLine,
       label: 'Total Stock In',
-      value: `${formatNumber(stats.totalIn)} ${unit}`,
+      value: `${formatNumber(stats.total_in)} ${unit}`,
       accent: 'green',
     },
     {
       icon: ArrowUpFromLine,
       label: 'Total Stock Out',
-      value: `${formatNumber(stats.totalOut)} ${unit}`,
+      value: `${formatNumber(stats.total_out)} ${unit}`,
       accent: 'amber',
     },
     {
       icon: Repeat,
       label: 'Transactions',
-      value: formatNumber(stats.transactionCount),
+      value: formatNumber(stats.transaction_count),
       accent: 'brand',
     },
     {
       icon: Clock,
       label: 'Last Movement',
-      value: formatDateTime(stats.lastMovementAt),
+      value: formatDateTime(stats.last_movement_at),
       accent: 'slate',
     },
   ];
