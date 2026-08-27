@@ -4,7 +4,7 @@
 // optional filter section (passed as `children`), and the download button.
 // ----------------------------------------------------------------------------
 
-import { Download } from 'lucide-react';
+import { Download, Table } from 'lucide-react';
 import Button from '../common/Button';
 
 export default function ReportCard({
@@ -16,6 +16,7 @@ export default function ReportCard({
   onDownload,
   buttonLabel = 'Download PDF',
   onDownloadCsv,
+  loadingCsv = false,
   children,
 }) {
   const accents = {
@@ -54,10 +55,10 @@ export default function ReportCard({
         </Button>
         {onDownloadCsv && (
           <Button
-            icon={Download}
+            icon={Table}
             variant="secondary"
             onClick={onDownloadCsv}
-            loading={loading}
+            loading={loadingCsv}
             className="flex-1"
           >
             Download CSV
