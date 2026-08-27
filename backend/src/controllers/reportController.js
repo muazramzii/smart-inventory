@@ -393,6 +393,40 @@ const ReportController = {
       next(err);
     }
   },
+
+  async auditLogsCsv(req, res, next) {
+    try {
+      const { action, entity, userId, startDate, endDate } = req.query;
+
+      const { data: logs } = await AuditLogModel.findAll({
+        action: action || null,
+        entity: entity || null,
+        userId: userId ? parseInt(userId, 10) : null,
+        startDate: startDate || null,
+        endDate: endDate || null,
+        page: 1,
+        limit: 5000,
+        maxLimit: 5000,
+      });
+
+      const csv = toCsv(
+        [
+          { label: 'Date', key: 'created_at' },
+          { label: 'User', key: 'user_name', format: (v) => v || '' },
+          { label: 'Action', key: 'action' },
+          { label: 'Entity', key: 'entity', format: (v) => v || '' },
+          { label: 'Entity ID', key: 'entity_id', format: (v) => v || '' },
+          { label: 'IP Address', key: 'ip_address', format: (v) => v || '' },
+          { label: 'Details', key: 'details', format: (v) => (v ? JSON.stringify(v) : '') },
+        ],
+        logs
+      );
+
+      sendCsv(res, `audit-logs-report-${Date.now()}.csv`, csv);
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = ReportController;
