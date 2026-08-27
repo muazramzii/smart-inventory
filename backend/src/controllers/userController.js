@@ -142,6 +142,41 @@ const UserController = {
       next(err);
     }
   },
+
+  async resetPassword(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body;
+
+      const existing = await UserModel.findById(id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      if (String(req.user.id) === String(id)) {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot reset your own password here — use Change Password instead',
+        });
+      }
+
+      const password_hash = await hashPassword(newPassword);
+      await UserModel.updatePassword(id, password_hash);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.USER_PASSWORD_RESET,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: id,
+        details: { name: existing.name, email: existing.email },
+      });
+
+      res.json({ success: true, message: 'Password reset successfully' });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = UserController;

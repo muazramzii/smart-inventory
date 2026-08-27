@@ -17,6 +17,7 @@ const ACTIONS = [
   'USER_CREATE',
   'USER_UPDATE',
   'USER_DEACTIVATE',
+  'USER_PASSWORD_RESET',
 ];
 
 const ENTITIES = ['user', 'product', 'transaction'];

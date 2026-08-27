@@ -8,6 +8,7 @@ const { body } = require('express-validator');
 const AuthController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 const validate = require('../middleware/validate');
+const { passwordComplexity } = require('../validators/passwordRules');
 
 const router = express.Router();
 
@@ -28,11 +29,7 @@ router.post(
   authMiddleware,
   [
     body('currentPassword').isLength({ min: 1 }).withMessage('Current password required'),
-    body('newPassword')
-      .isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
-      .matches(/[A-Z]/).withMessage('New password must contain an uppercase letter')
-      .matches(/[a-z]/).withMessage('New password must contain a lowercase letter')
-      .matches(/[0-9]/).withMessage('New password must contain a number'),
+    passwordComplexity('newPassword'),
   ],
   validate,
   AuthController.changePassword

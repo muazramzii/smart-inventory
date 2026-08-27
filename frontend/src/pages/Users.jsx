@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, UserX, UserCheck, Users as UsersIcon, Mail } from 'lucide-react';
+import { Plus, Pencil, UserX, UserCheck, Users as UsersIcon, Mail, KeyRound } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { userApi } from '../api/userApi';
@@ -16,6 +16,7 @@ import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import UserFormModal from '../components/users/UserFormModal';
+import ResetPasswordModal from '../components/users/ResetPasswordModal';
 
 export default function Users() {
   const { user: currentUser } = useAuth();
@@ -67,6 +68,14 @@ export default function Users() {
 
   const [deactivateTarget, setDeactivateTarget] = useState(null);
   const [deactivating, setDeactivating] = useState(false);
+
+  const [resetTarget, setResetTarget] = useState(null);
+
+  const handleResetPassword = async (newPassword) => {
+    await userApi.resetPassword(resetTarget.id, newPassword);
+    toast.success(`Password reset for "${resetTarget.name}"`);
+    setResetTarget(null);
+  };
 
   const activate = async (u) => {
     try {
@@ -134,6 +143,7 @@ export default function Users() {
               onEdit={openEdit}
               onActivate={activate}
               onRequestDeactivate={setDeactivateTarget}
+              onRequestResetPassword={setResetTarget}
             />
           ))}
         </div>
@@ -161,11 +171,25 @@ export default function Users() {
         onConfirm={confirmDeactivate}
         onCancel={() => setDeactivateTarget(null)}
       />
+
+      <ResetPasswordModal
+        open={!!resetTarget}
+        user={resetTarget}
+        onSave={handleResetPassword}
+        onClose={() => setResetTarget(null)}
+      />
     </DashboardLayout>
   );
 }
 
-function UserCard({ targetUser: u, isSelf, onEdit, onActivate, onRequestDeactivate }) {
+function UserCard({
+  targetUser: u,
+  isSelf,
+  onEdit,
+  onActivate,
+  onRequestDeactivate,
+  onRequestResetPassword,
+}) {
   return (
     <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
       <div className="mb-3 flex items-start justify-between gap-3">
@@ -212,6 +236,16 @@ function UserCard({ targetUser: u, isSelf, onEdit, onActivate, onRequestDeactiva
             <Button size="sm" variant="secondary" icon={Pencil} onClick={() => onEdit(u)}>
               Edit
             </Button>
+            {u.is_active && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={KeyRound}
+                onClick={() => onRequestResetPassword(u)}
+              >
+                Reset Password
+              </Button>
+            )}
             <Button
               size="sm"
               variant="ghost"
