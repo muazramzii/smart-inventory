@@ -41,4 +41,15 @@ router.get(
   ReportController.transactionsCsv
 );
 
+const auditLogExportRules = [
+  query('action').optional().isString().isLength({ max: 50 }),
+  query('entity').optional().isString().isLength({ max: 50 }),
+  query('userId').optional().isInt({ min: 1 }),
+  query('startDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+  query('endDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+];
+
+router.get('/audit-logs.pdf', auditLogExportRules, validate, ReportController.auditLogs);
+router.get('/audit-logs.csv', auditLogExportRules, validate, ReportController.auditLogsCsv);
+
 module.exports = router;
