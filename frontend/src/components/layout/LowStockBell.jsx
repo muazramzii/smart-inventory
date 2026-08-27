@@ -4,7 +4,7 @@
 // dropdown listing the affected products. Visible on every page.
 // ----------------------------------------------------------------------------
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, AlertTriangle } from 'lucide-react';
 import { productApi } from '../../api/productApi';
@@ -13,15 +13,27 @@ import { formatNumber } from '../../utils/format';
 export default function LowStockBell() {
   const [products, setProducts] = useState([]);
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     productApi.lowStock().then(setProducts).catch(() => {});
   }, []);
 
+  // Close dropdown when clicking outside, same pattern as the user menu
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const count = products.length;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapperRef}>
       <button
         onClick={() => setOpen((v) => !v)}
         className="relative rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"

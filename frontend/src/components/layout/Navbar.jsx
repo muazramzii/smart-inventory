@@ -10,7 +10,7 @@ import { useAuth } from '../../hooks/useAuth';
 import LowStockBell from './LowStockBell';
 
 export default function Navbar({ onMenuClick, title = 'Dashboard' }) {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -52,7 +52,7 @@ export default function Navbar({ onMenuClick, title = 'Dashboard' }) {
       </div>
 
       <div className="flex items-center gap-2">
-        {isAdmin && <LowStockBell />}
+        <LowStockBell />
 
         {/* User dropdown */}
         <div ref={menuRef} className="relative">
