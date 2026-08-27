@@ -123,8 +123,10 @@ export default function Products() {
 
   const handleBulkImport = async (csv) => {
     const result = await productApi.bulkImport(csv);
-    toast.success(`${result.created} product(s) imported`);
-    setImportOpen(false);
+    if (result.created > 0) {
+      loadProducts();
+    }
+    return result;
   };
 
   const confirmDelete = async () => {
