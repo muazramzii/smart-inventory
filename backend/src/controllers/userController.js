@@ -142,6 +142,25 @@ const UserController = {
       next(err);
     }
   },
+
+  async resetPassword(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body;
+
+      const existing = await UserModel.findById(id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const password_hash = await hashPassword(newPassword);
+      await UserModel.updatePassword(id, password_hash);
+
+      res.json({ success: true, message: 'Password reset successfully' });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = UserController;
