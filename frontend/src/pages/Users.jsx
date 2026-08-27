@@ -227,7 +227,7 @@ function UserCard({
         </span>
       </div>
 
-      <div className="mt-auto flex justify-end gap-1 border-t border-slate-100 pt-3">
+      <div className="mt-auto flex flex-wrap justify-end gap-1 border-t border-slate-100 pt-3">
         <Link to={`/audit-logs?userId=${u.id}`}>
           <Button size="sm" variant="ghost" icon={ScrollText}>
             View Activity
