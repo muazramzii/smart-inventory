@@ -10,6 +10,7 @@ const UserController = require('../controllers/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 const requireRole = require('../middleware/roleMiddleware');
 const validate = require('../middleware/validate');
+const { passwordComplexity } = require('../validators/passwordRules');
 
 const router = express.Router();
 
@@ -30,11 +31,7 @@ router.post(
   [
     body('name').trim().isLength({ min: 1, max: 100 }).withMessage('Name is required (max 100)'),
     body('email').trim().isEmail().withMessage('Valid email required'),
-    body('password')
-      .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
-      .matches(/[A-Z]/).withMessage('Password must contain an uppercase letter')
-      .matches(/[a-z]/).withMessage('Password must contain a lowercase letter')
-      .matches(/[0-9]/).withMessage('Password must contain a number'),
+    passwordComplexity('password'),
     body('role').isIn(['admin', 'staff']).withMessage('Role must be admin or staff'),
   ],
   validate,
@@ -65,7 +62,7 @@ router.post(
   '/:id/reset-password',
   [
     param('id').isInt({ min: 1 }),
-    body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    passwordComplexity('newPassword'),
   ],
   validate,
   UserController.resetPassword
