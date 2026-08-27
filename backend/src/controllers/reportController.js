@@ -8,6 +8,7 @@ const PDFDocument = require('pdfkit');
 const ProductModel = require('../models/productModel');
 const TransactionModel = require('../models/transactionModel');
 const UserModel = require('../models/userModel');
+const AuditLogModel = require('../models/auditLogModel');
 
 const {
   drawHeader,
@@ -331,6 +332,63 @@ const ReportController = {
       );
 
       sendCsv(res, `transactions-report-${Date.now()}.csv`, csv);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async auditLogs(req, res, next) {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      const { action, entity, userId, startDate, endDate } = req.query;
+
+      const { data: logs } = await AuditLogModel.findAll({
+        action: action || null,
+        entity: entity || null,
+        userId: userId ? parseInt(userId, 10) : null,
+        startDate: startDate || null,
+        endDate: endDate || null,
+        page: 1,
+        limit: 5000,
+        maxLimit: 5000,
+      });
+
+      const dateRange = (startDate || endDate)
+        ? `From ${startDate || '—'} to ${endDate || '—'}`
+        : 'All dates';
+
+      const doc = startPdf(res, `audit-logs-report-${Date.now()}.pdf`);
+
+      drawHeader(doc, {
+        title: 'Audit Log Report',
+        subtitle: dateRange + (action ? `  •  Action: ${action}` : '') + (entity ? `  •  Entity: ${entity}` : ''),
+        generatedBy: user ? `${user.name} (${user.role})` : '',
+      });
+
+      drawSummary(doc, [
+        { label: 'Total Events', value: String(logs.length) },
+      ]);
+
+      drawTable(doc, {
+        columns: [
+          { label: 'Date', key: 'created_at', width: 90,
+            format: (v) => new Date(v).toLocaleDateString('en-US', {
+              year: '2-digit', month: 'short', day: 'numeric',
+              hour: '2-digit', minute: '2-digit',
+            }) },
+          { label: 'User', key: 'user_name', width: 80, format: (v) => v || '-' },
+          { label: 'Action', key: 'action', width: 110 },
+          { label: 'Entity', key: 'entity', width: 90,
+            format: (v, row) => (v ? `${v} #${row.entity_id}` : '-') },
+          { label: 'IP', key: 'ip_address', width: 70, format: (v) => v || '-' },
+          { label: 'Details', key: 'details', width: 160,
+            format: (v) => (v ? JSON.stringify(v) : '') },
+        ],
+        rows: logs,
+      });
+
+      drawFooter(doc);
+      doc.end();
     } catch (err) {
       next(err);
     }
