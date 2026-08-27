@@ -36,7 +36,7 @@ export default function AuditLogFilters({
   users = [],
   disabled = false,
 }) {
-  const hasFilters = action || entity || startDate || endDate;
+  const hasFilters = action || entity || startDate || endDate || userId;
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -49,7 +49,7 @@ export default function AuditLogFilters({
         <option value="">All users</option>
         {users.map((u) => (
           <option key={u.id} value={u.id}>
-            {u.name}
+            {u.name}{!u.is_active ? ' (inactive)' : ''}
           </option>
         ))}
       </select>
@@ -110,6 +110,7 @@ export default function AuditLogFilters({
             onEntityChange(null);
             onStartDateChange(null);
             onEndDateChange(null);
+            onUserIdChange(null);
           }}
           disabled={disabled}
           className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
