@@ -3,6 +3,8 @@
 // Action + entity + date range filters for the audit trail.
 // ----------------------------------------------------------------------------
 
+import { X } from 'lucide-react';
+
 const ACTIONS = [
   'LOGIN',
   'CHANGE_PASSWORD',
@@ -26,6 +28,8 @@ export default function AuditLogFilters({
   endDate,
   onEndDateChange,
 }) {
+  const hasFilters = action || entity || startDate || endDate;
+
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <select
@@ -72,6 +76,21 @@ export default function AuditLogFilters({
           className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
         />
       </div>
+
+      {hasFilters && (
+        <button
+          onClick={() => {
+            onActionChange(null);
+            onEntityChange(null);
+            onStartDateChange(null);
+            onEndDateChange(null);
+          }}
+          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
+        >
+          <X size={12} />
+          Clear filters
+        </button>
+      )}
     </div>
   );
 }
