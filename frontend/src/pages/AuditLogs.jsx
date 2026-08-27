@@ -22,7 +22,7 @@ import AuditLogTable from '../components/auditLogs/AuditLogTable';
 const PAGE_SIZE = 20;
 
 export default function AuditLogs() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [action, setAction] = useState(null);
   const [entity, setEntity] = useState(null);
@@ -30,6 +30,13 @@ export default function AuditLogs() {
   const [endDate, setEndDate] = useState(null);
   const [userId, setUserId] = useState(() => searchParams.get('userId'));
   const [page, setPage] = useState(1);
+
+  // Keep ?userId= in sync so refreshing or sharing the current URL preserves
+  // whichever user is being viewed, not just the one the page was opened with.
+  useEffect(() => {
+    setSearchParams(userId ? { userId } : {}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const [logs, setLogs] = useState([]);
   const [pagination, setPagination] = useState({
