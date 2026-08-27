@@ -40,6 +40,39 @@ const UserController = {
       next(err);
     }
   },
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const existing = await UserModel.findById(id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      await UserModel.update(id, req.body);
+      const updated = await UserModel.findById(id);
+
+      res.json({ success: true, data: updated });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async deactivate(req, res, next) {
+    try {
+      const { id } = req.params;
+      const existing = await UserModel.findById(id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      await UserModel.update(id, { is_active: false });
+
+      res.json({ success: true, message: 'User deactivated' });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = UserController;
