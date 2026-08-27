@@ -174,24 +174,39 @@ const ProductController = {
       const rows = parseCsv(csv);
 
       const results = { created: 0, errors: [] };
-      let categoryId = null;
 
-      for (const row of rows) {
-        if (row['Category']) {
-          const cat = await CategoryModel.findByName(row['Category']);
-          if (cat) categoryId = cat.id;
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const rowNum = i + 2; // +1 for the header row, +1 for 1-based counting
+
+        try {
+          const sku = row['SKU']?.trim();
+          const name = row['Name']?.trim();
+          if (!sku) throw new Error('SKU is required');
+          if (!name) throw new Error('Name is required');
+
+          const existingSku = await ProductModel.findBySku(sku);
+          if (existingSku) throw new Error(`SKU "${sku}" already exists`);
+
+          let categoryId = null;
+          if (row['Category']) {
+            const cat = await CategoryModel.findByName(row['Category']);
+            categoryId = cat ? cat.id : null;
+          }
+
+          await ProductModel.create({
+            sku,
+            name,
+            category_id: categoryId,
+            unit: row['Unit'] || 'pcs',
+            unit_price: Number(row['Unit Price']) || 0,
+            current_stock: Number(row['Stock']) || 0,
+            low_stock_threshold: Number(row['Low Stock Threshold']) || 10,
+          });
+          results.created++;
+        } catch (rowErr) {
+          results.errors.push({ row: rowNum, message: rowErr.message });
         }
-
-        await ProductModel.create({
-          sku: row['SKU'],
-          name: row['Name'],
-          category_id: categoryId,
-          unit: row['Unit'] || 'pcs',
-          unit_price: Number(row['Unit Price']) || 0,
-          current_stock: Number(row['Stock']) || 0,
-          low_stock_threshold: Number(row['Low Stock Threshold']) || 10,
-        });
-        results.created++;
       }
 
       res.json({ success: true, ...results });
