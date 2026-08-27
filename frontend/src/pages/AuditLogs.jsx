@@ -81,6 +81,7 @@ export default function AuditLogs() {
             onStartDateChange={setStartDate}
             endDate={endDate}
             onEndDateChange={setEndDate}
+            disabled={loading}
           />
         </div>
 

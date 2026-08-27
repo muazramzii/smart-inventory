@@ -41,7 +41,7 @@ export default function AuditLogTable({ logs }) {
                   </span>
                 </Td>
                 <Td>
-                  <span className="text-xs text-slate-500">
+                  <span className="line-clamp-1 block max-w-[220px] text-xs text-slate-500">
                     {log.details ? JSON.stringify(log.details) : '—'}
                   </span>
                 </Td>
@@ -73,7 +73,7 @@ export default function AuditLogTable({ logs }) {
               )}
             </p>
             {log.details && (
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 line-clamp-1 text-xs text-slate-500">
                 {JSON.stringify(log.details)}
               </p>
             )}

@@ -27,6 +27,7 @@ export default function AuditLogFilters({
   onStartDateChange,
   endDate,
   onEndDateChange,
+  disabled = false,
 }) {
   const hasFilters = action || entity || startDate || endDate;
 
@@ -35,7 +36,8 @@ export default function AuditLogFilters({
       <select
         value={action || ''}
         onChange={(e) => onActionChange(e.target.value || null)}
-        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+        disabled={disabled}
+        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <option value="">All actions</option>
         {ACTIONS.map((a) => (
@@ -48,7 +50,8 @@ export default function AuditLogFilters({
       <select
         value={entity || ''}
         onChange={(e) => onEntityChange(e.target.value || null)}
-        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+        disabled={disabled}
+        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <option value="">All entities</option>
         {ENTITIES.map((e) => (
@@ -64,7 +67,8 @@ export default function AuditLogFilters({
           type="date"
           value={startDate || ''}
           onChange={(e) => onStartDateChange(e.target.value || null)}
-          className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+          disabled={disabled}
+          className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -73,7 +77,8 @@ export default function AuditLogFilters({
           type="date"
           value={endDate || ''}
           onChange={(e) => onEndDateChange(e.target.value || null)}
-          className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+          disabled={disabled}
+          className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
 
@@ -85,7 +90,8 @@ export default function AuditLogFilters({
             onStartDateChange(null);
             onEndDateChange(null);
           }}
-          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
+          disabled={disabled}
+          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <X size={12} />
           Clear filters
