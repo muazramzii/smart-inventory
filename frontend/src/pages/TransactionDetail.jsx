@@ -5,13 +5,14 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpFromLine, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { transactionApi } from '../api/transactionApi';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
+import Button from '../components/common/Button';
 import { formatCurrency, formatNumber, formatDateTime } from '../utils/format';
 
 export default function TransactionDetail() {
@@ -19,6 +20,7 @@ export default function TransactionDetail() {
 
   const [tx, setTx] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reversing, setReversing] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -34,6 +36,18 @@ export default function TransactionDetail() {
     };
     load();
   }, [id]);
+
+  const handleReverse = async () => {
+    setReversing(true);
+    try {
+      const res = await transactionApi.remove(id);
+      toast.success(`Transaction reversed — stock now ${res.newStock}`);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Reverse failed');
+    } finally {
+      setReversing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -87,6 +101,19 @@ export default function TransactionDetail() {
             }
           />
         </dl>
+
+        <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={RotateCcw}
+            onClick={handleReverse}
+            loading={reversing}
+            className="text-red-600 hover:bg-red-50"
+          >
+            Reverse Transaction
+          </Button>
+        </div>
       </div>
     </DashboardLayout>
   );
