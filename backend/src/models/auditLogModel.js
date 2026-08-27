@@ -31,6 +31,9 @@ const AuditLogModel = {
       endDate = null,
       page = 1,
       limit = 20,
+      // Callers exporting the full filtered result (not paginating through
+      // the UI) need to raise this past the normal page-size ceiling.
+      maxLimit = 100,
     } = opts;
 
     const where = [];
@@ -64,7 +67,7 @@ const AuditLogModel = {
       params
     );
 
-    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), maxLimit);
     const safePage = Math.max(parseInt(page, 10) || 1, 1);
     const offset = (safePage - 1) * safeLimit;
 
