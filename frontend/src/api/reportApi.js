@@ -104,4 +104,32 @@ export const reportApi = {
       `transactions-report-${stamp()}.csv`
     );
   },
+
+  auditLogs({ action, entity, userId, startDate, endDate } = {}) {
+    return downloadPdf(
+      '/reports/audit-logs.pdf',
+      {
+        ...(action && { action }),
+        ...(entity && { entity }),
+        ...(userId && { userId }),
+        ...(startDate && { startDate }),
+        ...(endDate && { endDate }),
+      },
+      `audit-logs-report-${stamp()}.pdf`
+    );
+  },
+
+  auditLogsCsv({ action, entity, userId, startDate, endDate } = {}) {
+    return downloadCsv(
+      '/reports/audit-logs.csv',
+      {
+        ...(action && { action }),
+        ...(entity && { entity }),
+        ...(userId && { userId }),
+        ...(startDate && { startDate }),
+        ...(endDate && { endDate }),
+      },
+      `audit-logs-report-${stamp()}.csv`
+    );
+  },
 };
