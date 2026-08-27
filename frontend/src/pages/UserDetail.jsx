@@ -163,14 +163,18 @@ export default function UserDetail() {
         <div className="flex items-center justify-between border-b border-slate-200 p-4">
           <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
           <Link
-            to="/audit-logs"
+            to={`/audit-logs?userId=${id}`}
             className="inline-flex items-center gap-1 text-xs text-brand-600 hover:underline"
           >
             <ScrollText size={12} />
             View Full Activity
           </Link>
         </div>
-        <AuditLogTable logs={recentLogs} />
+        {recentLogs.length === 0 ? (
+          <p className="p-4 text-sm text-slate-500">No recent activity.</p>
+        ) : (
+          <AuditLogTable logs={recentLogs} />
+        )}
       </div>
 
       <UserFormModal
