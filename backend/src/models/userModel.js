@@ -6,6 +6,15 @@
 const db = require('../config/db');
 
 const UserModel = {
+  async findAll() {
+    const [rows] = await db.query(
+      `SELECT id, name, email, role, is_active, created_at
+       FROM users
+       ORDER BY name ASC`
+    );
+    return rows;
+  },
+
   async findByEmail(email) {
     const [rows] = await db.query(
       `SELECT id, name, email, password_hash, role, is_active, created_at
@@ -50,6 +59,25 @@ const UserModel = {
       [name, email, password_hash, role]
     );
     return result.insertId;
+  },
+
+  async update(id, data) {
+    const allowed = ['name', 'email', 'role', 'is_active'];
+    const sets = [];
+    const params = [];
+    for (const f of allowed) {
+      if (Object.prototype.hasOwnProperty.call(data, f)) {
+        sets.push(`${f} = ?`);
+        params.push(data[f]);
+      }
+    }
+    if (sets.length === 0) return false;
+    params.push(id);
+    const [result] = await db.query(
+      `UPDATE users SET ${sets.join(', ')} WHERE id = ?`,
+      params
+    );
+    return result.affectedRows > 0;
   },
 
   async updatePassword(id, password_hash) {

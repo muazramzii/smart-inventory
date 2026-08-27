@@ -16,6 +16,7 @@ import {
   Boxes,
   User,
   ScrollText,
+  Users,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
 ];
 
 const ADMIN_NAV_ITEMS = [
+  { to: '/users',      label: 'Users',      icon: Users },
   { to: '/audit-logs', label: 'Audit Logs', icon: ScrollText },
 ];
 

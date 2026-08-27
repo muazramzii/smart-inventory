@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 
 import { authApi } from '../api/authApi';
 import { useAuth } from '../hooks/useAuth';
+import { scorePassword, STRENGTH_LABELS, strengthColorClass } from '../utils/passwordStrength';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Input from '../components/common/Input';
@@ -41,24 +42,9 @@ export default function Profile() {
     if (errors[name]) setErrors((e) => ({ ...e, [name]: undefined }));
   };
 
-  // Tiny strength meter
-  const strength = (() => {
-    const p = form.newPassword;
-    let score = 0;
-    if (p.length >= 8) score++;
-    if (/[A-Z]/.test(p)) score++;
-    if (/[a-z]/.test(p)) score++;
-    if (/[0-9]/.test(p)) score++;
-    if (/[^A-Za-z0-9]/.test(p)) score++;
-    return score; // 0-5
-  })();
-
-  const strengthLabel = ['Too short', 'Weak', 'Fair', 'Good', 'Strong', 'Excellent'][strength];
-  const strengthColor =
-    strength <= 1 ? 'bg-red-500' :
-    strength <= 2 ? 'bg-amber-500' :
-    strength <= 3 ? 'bg-yellow-500' :
-    strength <= 4 ? 'bg-green-500' : 'bg-emerald-600';
+  const strength = scorePassword(form.newPassword);
+  const strengthLabel = STRENGTH_LABELS[strength];
+  const strengthColor = strengthColorClass(strength);
 
   const onSubmit = async (e) => {
     e.preventDefault();
