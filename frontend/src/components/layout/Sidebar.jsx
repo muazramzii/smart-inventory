@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import {
   LayoutDashboard,
   Package,
@@ -14,6 +15,7 @@ import {
   X,
   Boxes,
   User,
+  ScrollText,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -25,11 +27,17 @@ const NAV_ITEMS = [
   { to: '/reports',      label: 'Reports',      icon: FileText },
 ];
 
+const ADMIN_NAV_ITEMS = [
+  { to: '/audit-logs', label: 'Audit Logs', icon: ScrollText },
+];
+
 const ACCOUNT_ITEMS = [
   { to: '/profile', label: 'Profile', icon: User },
 ];
 
 export default function Sidebar({ open, onClose }) {
+  const { isAdmin } = useAuth();
+
   return (
     <>
       {open && (
@@ -67,6 +75,24 @@ export default function Sidebar({ open, onClose }) {
               key={to}
               to={to}
               end={to === '/'}
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-brand-50 text-brand-700'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`
+              }
+            >
+              <Icon size={18} />
+              {label}
+            </NavLink>
+          ))}
+
+          {isAdmin && ADMIN_NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${

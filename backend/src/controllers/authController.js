@@ -6,6 +6,8 @@
 const UserModel = require('../models/userModel');
 const { comparePassword, hashPassword } = require('../utils/hash');
 const { signToken } = require('../utils/jwt');
+const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const AuthController = {
   async login(req, res, next) {
@@ -29,6 +31,14 @@ const AuthController = {
       }
 
       const token = signToken({ id: user.id, role: user.role });
+
+      recordAudit({
+        req,
+        userId: user.id,
+        action: AUDIT_ACTIONS.LOGIN,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: user.id,
+      });
 
       res.json({
         success: true,
@@ -90,6 +100,14 @@ const AuthController = {
 
       const newHash = await hashPassword(newPassword);
       await UserModel.updatePassword(user.id, newHash);
+
+      recordAudit({
+        req,
+        userId: user.id,
+        action: AUDIT_ACTIONS.CHANGE_PASSWORD,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: user.id,
+      });
 
       res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {

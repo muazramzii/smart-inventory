@@ -5,6 +5,8 @@
 
 const TransactionModel = require('../models/transactionModel');
 const SupplierModel = require('../models/supplierModel');
+const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const TransactionController = {
   async list(req, res, next) {
@@ -72,6 +74,16 @@ const TransactionController = {
       });
 
       const tx = await TransactionModel.findById(result.id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.STOCK_IN,
+        entity: AUDIT_ENTITIES.TRANSACTION,
+        entityId: result.id,
+        details: { product_id, quantity, newStock: result.newStock },
+      });
+
       res.status(201).json({
         success: true,
         data: tx,
@@ -97,6 +109,16 @@ const TransactionController = {
       });
 
       const tx = await TransactionModel.findById(result.id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.STOCK_OUT,
+        entity: AUDIT_ENTITIES.TRANSACTION,
+        entityId: result.id,
+        details: { product_id, quantity, newStock: result.newStock },
+      });
+
       res.status(201).json({
         success: true,
         data: tx,
@@ -110,6 +132,16 @@ const TransactionController = {
   async remove(req, res, next) {
     try {
       const result = await TransactionModel.remove(req.params.id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.TRANSACTION_REVERSE,
+        entity: AUDIT_ENTITIES.TRANSACTION,
+        entityId: req.params.id,
+        details: result,
+      });
+
       res.json({
         success: true,
         message: 'Transaction reversed and deleted',

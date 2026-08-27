@@ -5,6 +5,8 @@
 
 const ProductModel = require('../models/productModel');
 const CategoryModel = require('../models/categoryModel');
+const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const ProductController = {
   async list(req, res, next) {
@@ -78,6 +80,16 @@ const ProductController = {
 
       const id = await ProductModel.create(req.body);
       const created = await ProductModel.findById(id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.PRODUCT_CREATE,
+        entity: AUDIT_ENTITIES.PRODUCT,
+        entityId: id,
+        details: { sku: created.sku, name: created.name },
+      });
+
       res.status(201).json({ success: true, data: created });
     } catch (err) {
       next(err);
@@ -114,6 +126,16 @@ const ProductController = {
 
       await ProductModel.update(id, req.body);
       const updated = await ProductModel.findById(id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.PRODUCT_UPDATE,
+        entity: AUDIT_ENTITIES.PRODUCT,
+        entityId: id,
+        details: { fields: Object.keys(req.body) },
+      });
+
       res.json({ success: true, data: updated });
     } catch (err) {
       next(err);
@@ -128,6 +150,16 @@ const ProductController = {
         return res.status(404).json({ success: false, message: 'Product not found' });
       }
       await ProductModel.softDelete(id);
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.PRODUCT_DELETE,
+        entity: AUDIT_ENTITIES.PRODUCT,
+        entityId: id,
+        details: { sku: existing.sku, name: existing.name },
+      });
+
       res.json({ success: true, message: 'Product deactivated' });
     } catch (err) {
       next(err);
