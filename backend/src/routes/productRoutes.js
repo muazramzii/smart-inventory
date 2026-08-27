@@ -81,4 +81,12 @@ router.delete(
   ProductController.remove
 );
 
+router.post(
+  '/bulk-import',
+  requireRole('admin'),
+  [body('csv').isString().notEmpty().withMessage('CSV text is required')],
+  validate,
+  ProductController.bulkImport
+);
+
 module.exports = router;

@@ -40,4 +40,9 @@ export const productApi = {
     const { data } = await api.get('/products/low-stock');
     return data.data;
   },
+
+  async bulkImport(csv) {
+    const { data } = await api.post('/products/bulk-import', { csv });
+    return data;
+  },
 };

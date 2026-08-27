@@ -7,6 +7,7 @@ const ProductModel = require('../models/productModel');
 const CategoryModel = require('../models/categoryModel');
 const { recordAudit } = require('../utils/auditLogger');
 const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
+const { parseCsv } = require('../utils/csvHelpers');
 
 const ProductController = {
   async list(req, res, next) {
@@ -162,6 +163,61 @@ const ProductController = {
       });
 
       res.json({ success: true, message: 'Product deactivated' });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async bulkImport(req, res, next) {
+    try {
+      const { csv } = req.body;
+      const rows = parseCsv(csv);
+
+      const results = { created: 0, errors: [] };
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const rowNum = i + 2; // +1 for the header row, +1 for 1-based counting
+
+        try {
+          const sku = row['SKU']?.trim();
+          const name = row['Name']?.trim();
+          if (!sku) throw new Error('SKU is required');
+          if (!name) throw new Error('Name is required');
+
+          const existingSku = await ProductModel.findBySku(sku);
+          if (existingSku) throw new Error(`SKU "${sku}" already exists`);
+
+          let categoryId = null;
+          if (row['Category']) {
+            const cat = await CategoryModel.findByName(row['Category']);
+            categoryId = cat ? cat.id : null;
+          }
+
+          await ProductModel.create({
+            sku,
+            name,
+            category_id: categoryId,
+            unit: row['Unit'] || 'pcs',
+            unit_price: Number(row['Unit Price']) || 0,
+            current_stock: Number(row['Stock']) || 0,
+            low_stock_threshold: Number(row['Low Stock Threshold']) || 10,
+          });
+          results.created++;
+        } catch (rowErr) {
+          results.errors.push({ row: rowNum, message: rowErr.message });
+        }
+      }
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.PRODUCT_BULK_IMPORT,
+        entity: AUDIT_ENTITIES.PRODUCT,
+        details: { created: results.created, failed: results.errors.length },
+      });
+
+      res.json({ success: true, ...results });
     } catch (err) {
       next(err);
     }
