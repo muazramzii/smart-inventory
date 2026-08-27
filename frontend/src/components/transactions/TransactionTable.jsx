@@ -12,6 +12,7 @@ export default function TransactionTable({
   transactions,
   isAdmin,
   onReverse,
+  hideProductColumn = false,
 }) {
   return (
     <>
@@ -22,7 +23,7 @@ export default function TransactionTable({
             <tr>
               <Th>When</Th>
               <Th>Type</Th>
-              <Th>Product</Th>
+              {!hideProductColumn && <Th>Product</Th>}
               <Th align="right">Qty</Th>
               <Th align="right">Unit Price</Th>
               <Th>User</Th>
@@ -42,14 +43,16 @@ export default function TransactionTable({
                 <Td>
                   <TypeBadge type={t.type} />
                 </Td>
-                <Td>
-                  <div className="font-medium text-slate-900">
-                    {t.product_name}
-                  </div>
-                  <div className="font-mono text-xs text-slate-500">
-                    {t.product_sku}
-                  </div>
-                </Td>
+                {!hideProductColumn && (
+                  <Td>
+                    <div className="font-medium text-slate-900">
+                      {t.product_name}
+                    </div>
+                    <div className="font-mono text-xs text-slate-500">
+                      {t.product_sku}
+                    </div>
+                  </Td>
+                )}
                 <Td align="right">
                   <span
                     className={`font-semibold ${
@@ -107,10 +110,14 @@ export default function TransactionTable({
                     {formatDateTime(t.created_at)}
                   </span>
                 </div>
-                <p className="font-medium text-slate-900">{t.product_name}</p>
-                <p className="font-mono text-xs text-slate-500">
-                  {t.product_sku}
-                </p>
+                {!hideProductColumn && (
+                  <>
+                    <p className="font-medium text-slate-900">{t.product_name}</p>
+                    <p className="font-mono text-xs text-slate-500">
+                      {t.product_sku}
+                    </p>
+                  </>
+                )}
                 <p className="mt-1 text-xs text-slate-500">
                   by {t.user_name}
                   {t.supplier_name && ` · from ${t.supplier_name}`}

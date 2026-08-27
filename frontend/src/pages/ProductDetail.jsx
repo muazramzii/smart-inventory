@@ -15,27 +15,42 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
+import Pagination from '../components/common/Pagination';
 import ProductStatsCards from '../components/products/ProductStatsCards';
 import TransactionTable from '../components/transactions/TransactionTable';
 import { formatCurrency, formatNumber } from '../utils/format';
+
+const PAGE_SIZE = 20;
 
 export default function ProductDetail() {
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
-  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const [transactions, setTransactions] = useState([]);
+  const [txPagination, setTxPagination] = useState({
+    page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0,
+  });
+  const [txPage, setTxPage] = useState(1);
+
+  useEffect(() => {
+    setTxPage(1);
+  }, [id]);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setNotFound(false);
       try {
-        const p = await productApi.getOne(id);
+        const [p, txResult] = await Promise.all([
+          productApi.getOne(id),
+          transactionApi.list({ productId: id, page: txPage, limit: PAGE_SIZE }),
+        ]);
         setProduct(p);
-        const { data } = await transactionApi.list({ productId: id, limit: 20 });
-        setTransactions(data);
+        setTransactions(txResult.data);
+        setTxPagination(txResult.pagination);
       } catch (err) {
         if (err.response?.status === 404) {
           setNotFound(true);
@@ -47,7 +62,7 @@ export default function ProductDetail() {
       }
     };
     load();
-  }, [id]);
+  }, [id, txPage]);
 
   if (loading) {
     return (
@@ -144,7 +159,21 @@ export default function ProductDetail() {
             description="Stock movements for this product will appear here."
           />
         ) : (
-          <TransactionTable transactions={transactions} isAdmin={false} onReverse={() => {}} />
+          <>
+            <TransactionTable
+              transactions={transactions}
+              isAdmin={false}
+              onReverse={() => {}}
+              hideProductColumn
+            />
+            <Pagination
+              page={txPagination.page}
+              totalPages={txPagination.totalPages}
+              total={txPagination.total}
+              pageSize={txPagination.limit}
+              onChange={setTxPage}
+            />
+          </>
         )}
       </div>
     </DashboardLayout>
