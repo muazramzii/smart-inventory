@@ -29,6 +29,16 @@ router.get(
 
 router.get('/inventory.csv', ReportController.inventoryCsv);
 router.get('/low-stock.csv', ReportController.lowStockCsv);
-router.get('/transactions.csv', ReportController.transactionsCsv);
+
+router.get(
+  '/transactions.csv',
+  [
+    query('startDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+    query('endDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+    query('type').optional().isIn(['IN', 'OUT']),
+  ],
+  validate,
+  ReportController.transactionsCsv
+);
 
 module.exports = router;
