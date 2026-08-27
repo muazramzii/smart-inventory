@@ -35,7 +35,7 @@ export default function Products() {
   // ---- Filter state ----
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState(null);
-  const [lowStockOnly, setLowStockOnly] = useState(() => searchParams.get('lowStockOnly'));
+  const [lowStockOnly, setLowStockOnly] = useState(() => searchParams.get('lowStockOnly') === 'true');
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search, 300);
 
