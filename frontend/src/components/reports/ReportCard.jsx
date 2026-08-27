@@ -15,6 +15,7 @@ export default function ReportCard({
   loading = false,
   onDownload,
   buttonLabel = 'Download PDF',
+  onDownloadCsv,
   children,
 }) {
   const accents = {
@@ -42,15 +43,26 @@ export default function ReportCard({
       {/* Optional filter slot */}
       {children && <div className="mb-3 flex-1">{children}</div>}
 
-      <div className="mt-auto">
+      <div className="mt-auto flex gap-2">
         <Button
           icon={Download}
           onClick={onDownload}
           loading={loading}
-          className="w-full"
+          className="flex-1"
         >
           {buttonLabel}
         </Button>
+        {onDownloadCsv && (
+          <Button
+            icon={Download}
+            variant="secondary"
+            onClick={onDownloadCsv}
+            loading={loading}
+            className="flex-1"
+          >
+            Download CSV
+          </Button>
+        )}
       </div>
     </div>
   );
