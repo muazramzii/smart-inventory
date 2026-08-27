@@ -11,6 +11,11 @@ export const userApi = {
     return data.data;
   },
 
+  async getOne(id) {
+    const { data } = await api.get(`/users/${id}`);
+    return data.data;
+  },
+
   async create(payload) {
     const { data } = await api.post('/users', payload);
     return data.data;

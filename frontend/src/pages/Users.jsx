@@ -195,12 +195,15 @@ function UserCard({
     <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-slate-900">
+          <Link
+            to={`/users/${u.id}`}
+            className="block truncate font-semibold text-slate-900 hover:text-brand-600 hover:underline"
+          >
             {u.name}
             {isSelf && (
               <span className="ml-1 text-xs font-normal text-slate-400">(You)</span>
             )}
-          </h3>
+          </Link>
           <p className="flex items-center gap-1 text-xs text-slate-500">
             <Mail size={11} />
             {u.email}
