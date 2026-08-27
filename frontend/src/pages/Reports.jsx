@@ -37,10 +37,13 @@ const startOfMonth = () => {
 };
 
 export default function Reports() {
-  // ---- Loading flags per card ----
+  // ---- Loading flags per card, per format ----
   const [loadingInv, setLoadingInv] = useState(false);
+  const [loadingInvCsv, setLoadingInvCsv] = useState(false);
   const [loadingLow, setLoadingLow] = useState(false);
+  const [loadingLowCsv, setLoadingLowCsv] = useState(false);
   const [loadingTx, setLoadingTx] = useState(false);
+  const [loadingTxCsv, setLoadingTxCsv] = useState(false);
 
   // ---- Transaction filter state ----
   const [startDate, setStartDate] = useState('');
@@ -60,6 +63,18 @@ export default function Reports() {
     }
   };
 
+  const downloadInventoryCsv = async () => {
+    setLoadingInvCsv(true);
+    try {
+      await reportApi.inventoryCsv();
+      toast.success('Inventory CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingInvCsv(false);
+    }
+  };
+
   const downloadLowStock = async () => {
     setLoadingLow(true);
     try {
@@ -69,6 +84,18 @@ export default function Reports() {
       toast.error(err.response?.data?.message || 'Download failed');
     } finally {
       setLoadingLow(false);
+    }
+  };
+
+  const downloadLowStockCsv = async () => {
+    setLoadingLowCsv(true);
+    try {
+      await reportApi.lowStockCsv();
+      toast.success('Low stock CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingLowCsv(false);
     }
   };
 
@@ -85,6 +112,22 @@ export default function Reports() {
       toast.error(err.response?.data?.message || 'Download failed');
     } finally {
       setLoadingTx(false);
+    }
+  };
+
+  const downloadTransactionsCsv = async () => {
+    setLoadingTxCsv(true);
+    try {
+      await reportApi.transactionsCsv({
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        type: txType || undefined,
+      });
+      toast.success('Transaction CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingTxCsv(false);
     }
   };
 
@@ -111,7 +154,7 @@ export default function Reports() {
       <div className="mb-5">
         <h2 className="text-xl font-bold text-slate-900">Reports</h2>
         <p className="text-sm text-slate-500">
-          Download printable PDF reports for your records or to share with stakeholders.
+          Download reports as PDF or CSV for your records or to share with stakeholders.
         </p>
       </div>
 
@@ -124,6 +167,8 @@ export default function Reports() {
           accent="blue"
           loading={loadingInv}
           onDownload={downloadInventory}
+          onDownloadCsv={downloadInventoryCsv}
+          loadingCsv={loadingInvCsv}
         />
 
         {/* Card 2: Low stock */}
@@ -134,6 +179,8 @@ export default function Reports() {
           accent="amber"
           loading={loadingLow}
           onDownload={downloadLowStock}
+          onDownloadCsv={downloadLowStockCsv}
+          loadingCsv={loadingLowCsv}
         />
 
         {/* Card 3: Transactions — with filters */}
@@ -144,6 +191,8 @@ export default function Reports() {
           accent="purple"
           loading={loadingTx}
           onDownload={downloadTransactions}
+          onDownloadCsv={downloadTransactionsCsv}
+          loadingCsv={loadingTxCsv}
         >
           <div className="space-y-2.5">
             {/* Quick presets */}
@@ -191,7 +240,7 @@ export default function Reports() {
         <h3 className="text-sm font-semibold text-slate-700">💡 Tips</h3>
         <ul className="mt-2 space-y-1 text-sm text-slate-600">
           <li>
-            • Reports open as PDF downloads — check your browser's Downloads folder.
+            • Download PDF for a printable copy, or CSV to open in Excel/Sheets — check your browser's Downloads folder.
           </li>
           <li>
             • The Inventory Snapshot is great for periodic stock-takes.

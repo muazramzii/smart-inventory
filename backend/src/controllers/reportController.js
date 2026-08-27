@@ -17,6 +17,13 @@ const {
   money,
   PAGE_MARGIN,
 } = require('../utils/pdfHelpers');
+const { toCsv } = require('../utils/csvHelpers');
+
+function sendCsv(res, filename, csv) {
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(csv);
+}
 
 function startPdf(res, filename) {
   const doc = new PDFDocument({
@@ -101,6 +108,38 @@ const ReportController = {
     }
   },
 
+  async inventoryCsv(req, res, next) {
+    try {
+      const { data: products } = await ProductModel.findAll({
+        page: 1,
+        limit: 100,
+      });
+
+      const csv = toCsv(
+        [
+          { label: 'SKU', key: 'sku' },
+          { label: 'Name', key: 'name' },
+          { label: 'Category', key: 'category_name', format: (v) => v || '' },
+          { label: 'Unit', key: 'unit' },
+          { label: 'Stock', key: 'current_stock' },
+          { label: 'Low Stock Threshold', key: 'low_stock_threshold' },
+          { label: 'Unit Price', key: 'unit_price' },
+          {
+            label: 'Stock Value',
+            key: '_value',
+            format: (_, row) => (Number(row.current_stock) * Number(row.unit_price)).toFixed(2),
+          },
+          { label: 'Low Stock', key: 'is_low_stock', format: (v) => (v ? 'YES' : 'NO') },
+        ],
+        products
+      );
+
+      sendCsv(res, `inventory-report-${Date.now()}.csv`, csv);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async lowStock(req, res, next) {
     try {
       const user = await UserModel.findById(req.user.id);
@@ -150,6 +189,36 @@ const ReportController = {
 
       drawFooter(doc);
       doc.end();
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async lowStockCsv(req, res, next) {
+    try {
+      const products = await ProductModel.findLowStock();
+
+      const csv = toCsv(
+        [
+          { label: 'SKU', key: 'sku' },
+          { label: 'Name', key: 'name' },
+          { label: 'Category', key: 'category_name', format: (v) => v || '' },
+          { label: 'Unit', key: 'unit' },
+          { label: 'In Stock', key: 'current_stock' },
+          { label: 'Low Stock Threshold', key: 'low_stock_threshold' },
+          {
+            label: 'Suggested Buy',
+            key: '_suggest',
+            format: (_, row) => Math.max(
+              Number(row.low_stock_threshold) * 2 - Number(row.current_stock),
+              0
+            ),
+          },
+        ],
+        products
+      );
+
+      sendCsv(res, `low-stock-alert-${Date.now()}.csv`, csv);
     } catch (err) {
       next(err);
     }
@@ -229,6 +298,39 @@ const ReportController = {
 
       drawFooter(doc);
       doc.end();
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async transactionsCsv(req, res, next) {
+    try {
+      const { startDate, endDate, type } = req.query;
+
+      const { data: txs } = await TransactionModel.findAll({
+        startDate: startDate || null,
+        endDate: endDate || null,
+        type: type || null,
+        page: 1,
+        limit: 1000,
+      });
+
+      const csv = toCsv(
+        [
+          { label: 'Date', key: 'created_at' },
+          { label: 'Type', key: 'type' },
+          { label: 'SKU', key: 'product_sku' },
+          { label: 'Product', key: 'product_name' },
+          { label: 'Quantity', key: 'quantity' },
+          { label: 'Unit Price', key: 'unit_price', format: (v) => (v == null ? '' : v) },
+          { label: 'User', key: 'user_name' },
+          { label: 'Supplier', key: 'supplier_name', format: (v) => v || '' },
+          { label: 'Note', key: 'note', format: (v) => v || '' },
+        ],
+        txs
+      );
+
+      sendCsv(res, `transactions-report-${Date.now()}.csv`, csv);
     } catch (err) {
       next(err);
     }
