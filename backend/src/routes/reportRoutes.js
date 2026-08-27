@@ -8,7 +8,9 @@ const { query } = require('express-validator');
 
 const ReportController = require('../controllers/reportController');
 const authMiddleware = require('../middleware/authMiddleware');
+const requireRole = require('../middleware/roleMiddleware');
 const validate = require('../middleware/validate');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -39,6 +41,29 @@ router.get(
   ],
   validate,
   ReportController.transactionsCsv
+);
+
+const auditLogExportRules = [
+  query('action').optional().isIn(Object.values(AUDIT_ACTIONS)),
+  query('entity').optional().isIn(Object.values(AUDIT_ENTITIES)),
+  query('userId').optional().isInt({ min: 1 }),
+  query('startDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+  query('endDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+];
+
+router.get(
+  '/audit-logs.pdf',
+  requireRole('admin'),
+  auditLogExportRules,
+  validate,
+  ReportController.auditLogs
+);
+router.get(
+  '/audit-logs.csv',
+  requireRole('admin'),
+  auditLogExportRules,
+  validate,
+  ReportController.auditLogsCsv
 );
 
 module.exports = router;

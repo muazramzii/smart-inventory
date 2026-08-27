@@ -5,16 +5,18 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ScrollText } from 'lucide-react';
+import { ScrollText, Download, Table } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { auditLogApi } from '../api/auditLogApi';
 import { userApi } from '../api/userApi';
+import { reportApi } from '../api/reportApi';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Pagination from '../components/common/Pagination';
+import Button from '../components/common/Button';
 
 import AuditLogFilters from '../components/auditLogs/AuditLogFilters';
 import AuditLogTable from '../components/auditLogs/AuditLogTable';
@@ -54,6 +56,35 @@ export default function AuditLogs() {
 
   const filteredUser = users.find((u) => String(u.id) === String(userId));
 
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
+
+  const currentFilters = { action, entity, userId, startDate, endDate };
+
+  const exportPdf = async () => {
+    setExportingPdf(true);
+    try {
+      await reportApi.auditLogs(currentFilters);
+      toast.success('Audit log PDF downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
+  const exportCsv = async () => {
+    setExportingCsv(true);
+    try {
+      await reportApi.auditLogsCsv(currentFilters);
+      toast.success('Audit log CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setExportingCsv(false);
+    }
+  };
+
   const loadLogs = async () => {
     setLoading(true);
     try {
@@ -86,17 +117,39 @@ export default function AuditLogs() {
 
   return (
     <DashboardLayout title="Audit Logs">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-slate-900">Audit Logs</h2>
-        <p className="text-sm text-slate-500">
-          {pagination.total} {pagination.total === 1 ? 'event' : 'events'} recorded
-          {filteredUser && (
-            <>
-              {' '}— showing activity for{' '}
-              <span className="font-medium text-slate-700">{filteredUser.name}</span>
-            </>
-          )}
-        </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Audit Logs</h2>
+          <p className="text-sm text-slate-500">
+            {pagination.total} {pagination.total === 1 ? 'event' : 'events'} recorded
+            {filteredUser && (
+              <>
+                {' '}— showing activity for{' '}
+                <span className="font-medium text-slate-700">{filteredUser.name}</span>
+              </>
+            )}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            icon={Download}
+            variant="secondary"
+            onClick={exportPdf}
+            loading={exportingPdf}
+            disabled={loading}
+          >
+            Download PDF
+          </Button>
+          <Button
+            icon={Table}
+            variant="secondary"
+            onClick={exportCsv}
+            loading={exportingCsv}
+            disabled={loading}
+          >
+            Download CSV
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
