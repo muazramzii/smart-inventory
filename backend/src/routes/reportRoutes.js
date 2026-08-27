@@ -27,4 +27,8 @@ router.get(
   ReportController.transactions
 );
 
+router.get('/inventory.csv', ReportController.inventoryCsv);
+router.get('/low-stock.csv', ReportController.lowStockCsv);
+router.get('/transactions.csv', ReportController.transactionsCsv);
+
 module.exports = router;
