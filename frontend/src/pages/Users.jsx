@@ -4,7 +4,8 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, UserX, UserCheck, Users as UsersIcon, Mail, KeyRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Pencil, UserX, UserCheck, Users as UsersIcon, Mail, KeyRound, ScrollText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { userApi } from '../api/userApi';
@@ -227,8 +228,13 @@ function UserCard({
       </div>
 
       <div className="mt-auto flex justify-end gap-1 border-t border-slate-100 pt-3">
+        <Link to={`/audit-logs?userId=${u.id}`}>
+          <Button size="sm" variant="ghost" icon={ScrollText}>
+            View Activity
+          </Button>
+        </Link>
         {isSelf ? (
-          <p className="text-xs italic text-slate-400">
+          <p className="self-center text-xs italic text-slate-400">
             Manage your own account from Profile
           </p>
         ) : (
