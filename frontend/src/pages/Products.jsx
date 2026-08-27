@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { Plus, Package } from 'lucide-react';
+import { Plus, Package, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { productApi } from '../api/productApi';
@@ -23,6 +23,7 @@ import ConfirmDialog from '../components/common/ConfirmDialog';
 import ProductFilters from '../components/products/ProductFilters';
 import ProductTable from '../components/products/ProductTable';
 import ProductFormModal from '../components/products/ProductFormModal';
+import BulkImportModal from '../components/products/BulkImportModal';
 
 const PAGE_SIZE = 10;
 
@@ -54,6 +55,8 @@ export default function Products() {
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [importOpen, setImportOpen] = useState(false);
 
   // ---- Load categories once ----
   useEffect(() => {
@@ -118,6 +121,12 @@ export default function Products() {
     loadProducts();
   };
 
+  const handleBulkImport = async (csv) => {
+    const result = await productApi.bulkImport(csv);
+    toast.success(`${result.created} product(s) imported`);
+    setImportOpen(false);
+  };
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -144,9 +153,14 @@ export default function Products() {
           </p>
         </div>
         {isAdmin && (
-          <Button icon={Plus} onClick={openCreate}>
-            Add Product
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" icon={Upload} onClick={() => setImportOpen(true)}>
+              Bulk Import
+            </Button>
+            <Button icon={Plus} onClick={openCreate}>
+              Add Product
+            </Button>
+          </div>
         )}
       </div>
 
@@ -217,6 +231,12 @@ export default function Products() {
         categories={categories}
         onSave={handleSave}
         onClose={() => setFormOpen(false)}
+      />
+
+      <BulkImportModal
+        open={importOpen}
+        onImport={handleBulkImport}
+        onClose={() => setImportOpen(false)}
       />
 
       {/* Delete confirmation */}
