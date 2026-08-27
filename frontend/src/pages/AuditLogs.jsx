@@ -8,6 +8,7 @@ import { ScrollText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { auditLogApi } from '../api/auditLogApi';
+import { userApi } from '../api/userApi';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
@@ -31,6 +32,14 @@ export default function AuditLogs() {
     page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    userApi.list()
+      .then(setUsers)
+      .catch(() => {});
+  }, []);
 
   const loadLogs = async () => {
     setLoading(true);
