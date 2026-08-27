@@ -56,6 +56,35 @@ export default function AuditLogs() {
 
   const filteredUser = users.find((u) => String(u.id) === String(userId));
 
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
+
+  const currentFilters = { action, entity, userId, startDate, endDate };
+
+  const exportPdf = async () => {
+    setExportingPdf(true);
+    try {
+      await reportApi.auditLogs(currentFilters);
+      toast.success('Audit log PDF downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
+  const exportCsv = async () => {
+    setExportingCsv(true);
+    try {
+      await reportApi.auditLogsCsv(currentFilters);
+      toast.success('Audit log CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setExportingCsv(false);
+    }
+  };
+
   const loadLogs = async () => {
     setLoading(true);
     try {
@@ -102,10 +131,22 @@ export default function AuditLogs() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button icon={Download} variant="secondary" onClick={() => reportApi.auditLogs()}>
+          <Button
+            icon={Download}
+            variant="secondary"
+            onClick={exportPdf}
+            loading={exportingPdf}
+            disabled={loading}
+          >
             Download PDF
           </Button>
-          <Button icon={Table} variant="secondary" onClick={() => reportApi.auditLogsCsv()}>
+          <Button
+            icon={Table}
+            variant="secondary"
+            onClick={exportCsv}
+            loading={exportingCsv}
+            disabled={loading}
+          >
             Download CSV
           </Button>
         </div>
