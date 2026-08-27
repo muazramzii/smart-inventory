@@ -61,4 +61,14 @@ router.delete(
   UserController.deactivate
 );
 
+router.post(
+  '/:id/reset-password',
+  [
+    param('id').isInt({ min: 1 }),
+    body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  ],
+  validate,
+  UserController.resetPassword
+);
+
 module.exports = router;
