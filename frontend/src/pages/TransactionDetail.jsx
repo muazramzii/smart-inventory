@@ -4,8 +4,8 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowDownToLine, ArrowUpFromLine, RotateCcw } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowDownToLine, ArrowUpFromLine, ArrowLeft, RotateCcw, SearchX } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { transactionApi } from '../api/transactionApi';
@@ -14,24 +14,34 @@ import { useAuth } from '../hooks/useAuth';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import Button from '../components/common/Button';
+import EmptyState from '../components/common/EmptyState';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import { formatCurrency, formatNumber, formatDateTime } from '../utils/format';
 
 export default function TransactionDetail() {
   const { id } = useParams();
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   const [tx, setTx] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [reversing, setReversing] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setNotFound(false);
       try {
         const data = await transactionApi.getOne(id);
         setTx(data);
       } catch (err) {
-        toast.error(err.response?.data?.message || 'Failed to load transaction');
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          toast.error(err.response?.data?.message || 'Failed to load transaction');
+        }
       } finally {
         setLoading(false);
       }
@@ -44,10 +54,12 @@ export default function TransactionDetail() {
     try {
       const res = await transactionApi.remove(id);
       toast.success(`Transaction reversed — stock now ${res.newStock}`);
+      navigate('/transactions');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Reverse failed');
     } finally {
       setReversing(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -56,6 +68,27 @@ export default function TransactionDetail() {
       <DashboardLayout title="Transaction Detail">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <Loader label="Loading transaction..." />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (notFound || !tx) {
+    return (
+      <DashboardLayout title="Transaction Not Found">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <EmptyState
+            icon={SearchX}
+            title="Transaction not found"
+            description="This transaction may have already been reversed, or the link is incorrect."
+            action={
+              <Link to="/transactions">
+                <Button variant="secondary" icon={ArrowLeft}>
+                  Back to Transactions
+                </Button>
+              </Link>
+            }
+          />
         </div>
       </DashboardLayout>
     );
@@ -108,8 +141,7 @@ export default function TransactionDetail() {
               size="sm"
               variant="ghost"
               icon={RotateCcw}
-              onClick={handleReverse}
-              loading={reversing}
+              onClick={() => setConfirmOpen(true)}
               className="text-red-600 hover:bg-red-50"
             >
               Reverse Transaction
@@ -117,6 +149,24 @@ export default function TransactionDetail() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Reverse this transaction?"
+        message={
+          <>
+            This will undo the stock change for{' '}
+            <strong>{tx.product_name}</strong> (
+            {isIn ? '+' : '−'}
+            {formatNumber(tx.quantity)}) and delete the transaction record.
+            Use this only to fix mistakes.
+          </>
+        }
+        confirmLabel="Reverse & Delete"
+        loading={reversing}
+        onConfirm={handleReverse}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </DashboardLayout>
   );
 }
