@@ -14,6 +14,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import UserFormModal from '../components/users/UserFormModal';
 
 export default function Users() {
@@ -64,18 +65,31 @@ export default function Users() {
     load();
   };
 
-  const toggleActive = async (u) => {
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
+
+  const activate = async (u) => {
     try {
-      if (u.is_active) {
-        await userApi.deactivate(u.id);
-        toast.success(`"${u.name}" deactivated`);
-      } else {
-        await userApi.update(u.id, { is_active: true });
-        toast.success(`"${u.name}" reactivated`);
-      }
+      await userApi.update(u.id, { is_active: true });
+      toast.success(`"${u.name}" reactivated`);
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
+    }
+  };
+
+  const confirmDeactivate = async () => {
+    if (!deactivateTarget) return;
+    setDeactivating(true);
+    try {
+      await userApi.deactivate(deactivateTarget.id);
+      toast.success(`"${deactivateTarget.name}" deactivated`);
+      setDeactivateTarget(null);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Deactivate failed');
+    } finally {
+      setDeactivating(false);
     }
   };
 
@@ -118,7 +132,8 @@ export default function Users() {
               targetUser={u}
               isSelf={u.id === currentUser.id}
               onEdit={openEdit}
-              onToggleActive={toggleActive}
+              onActivate={activate}
+              onRequestDeactivate={setDeactivateTarget}
             />
           ))}
         </div>
@@ -131,11 +146,26 @@ export default function Users() {
         onSave={handleSave}
         onClose={() => setFormOpen(false)}
       />
+
+      <ConfirmDialog
+        open={!!deactivateTarget}
+        title="Deactivate user?"
+        message={
+          <>
+            Deactivate <strong>{deactivateTarget?.name}</strong>? They will no
+            longer be able to log in. You can reactivate them later.
+          </>
+        }
+        confirmLabel="Deactivate"
+        loading={deactivating}
+        onConfirm={confirmDeactivate}
+        onCancel={() => setDeactivateTarget(null)}
+      />
     </DashboardLayout>
   );
 }
 
-function UserCard({ targetUser: u, isSelf, onEdit, onToggleActive }) {
+function UserCard({ targetUser: u, isSelf, onEdit, onActivate, onRequestDeactivate }) {
   return (
     <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
       <div className="mb-3 flex items-start justify-between gap-3">
@@ -173,22 +203,30 @@ function UserCard({ targetUser: u, isSelf, onEdit, onToggleActive }) {
       </div>
 
       <div className="mt-auto flex justify-end gap-1 border-t border-slate-100 pt-3">
-        <Button size="sm" variant="secondary" icon={Pencil} onClick={() => onEdit(u)}>
-          Edit
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          icon={u.is_active ? UserX : UserCheck}
-          onClick={() => onToggleActive(u)}
-          className={
-            u.is_active
-              ? 'text-red-600 hover:bg-red-50'
-              : 'text-green-600 hover:bg-green-50'
-          }
-        >
-          {u.is_active ? 'Deactivate' : 'Activate'}
-        </Button>
+        {isSelf ? (
+          <p className="text-xs italic text-slate-400">
+            Manage your own account from Profile
+          </p>
+        ) : (
+          <>
+            <Button size="sm" variant="secondary" icon={Pencil} onClick={() => onEdit(u)}>
+              Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={u.is_active ? UserX : UserCheck}
+              onClick={() => (u.is_active ? onRequestDeactivate(u) : onActivate(u))}
+              className={
+                u.is_active
+                  ? 'text-red-600 hover:bg-red-50'
+                  : 'text-green-600 hover:bg-green-50'
+              }
+            >
+              {u.is_active ? 'Deactivate' : 'Activate'}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
