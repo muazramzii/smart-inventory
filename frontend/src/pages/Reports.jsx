@@ -60,11 +60,35 @@ export default function Reports() {
     }
   };
 
+  const downloadInventoryCsv = async () => {
+    setLoadingInv(true);
+    try {
+      await reportApi.inventoryCsv();
+      toast.success('Inventory CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingInv(false);
+    }
+  };
+
   const downloadLowStock = async () => {
     setLoadingLow(true);
     try {
       await reportApi.lowStock();
       toast.success('Low stock alert downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingLow(false);
+    }
+  };
+
+  const downloadLowStockCsv = async () => {
+    setLoadingLow(true);
+    try {
+      await reportApi.lowStockCsv();
+      toast.success('Low stock CSV downloaded');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Download failed');
     } finally {
@@ -81,6 +105,22 @@ export default function Reports() {
         type: txType || undefined,
       });
       toast.success('Transaction report downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingTx(false);
+    }
+  };
+
+  const downloadTransactionsCsv = async () => {
+    setLoadingTx(true);
+    try {
+      await reportApi.transactionsCsv({
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        type: txType || undefined,
+      });
+      toast.success('Transaction CSV downloaded');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Download failed');
     } finally {
@@ -124,6 +164,7 @@ export default function Reports() {
           accent="blue"
           loading={loadingInv}
           onDownload={downloadInventory}
+          onDownloadCsv={downloadInventoryCsv}
         />
 
         {/* Card 2: Low stock */}
@@ -134,6 +175,7 @@ export default function Reports() {
           accent="amber"
           loading={loadingLow}
           onDownload={downloadLowStock}
+          onDownloadCsv={downloadLowStockCsv}
         />
 
         {/* Card 3: Transactions — with filters */}
@@ -144,6 +186,7 @@ export default function Reports() {
           accent="purple"
           loading={loadingTx}
           onDownload={downloadTransactions}
+          onDownloadCsv={downloadTransactionsCsv}
         >
           <div className="space-y-2.5">
             {/* Quick presets */}
