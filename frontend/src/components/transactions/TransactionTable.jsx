@@ -4,6 +4,7 @@
 // Admins get a reverse button.
 // ----------------------------------------------------------------------------
 
+import { Link } from 'react-router-dom';
 import { ArrowDownToLine, ArrowUpFromLine, RotateCcw } from 'lucide-react';
 import Button from '../common/Button';
 import { formatNumber, formatDateTime, formatCurrency } from '../../utils/format';
@@ -36,9 +37,12 @@ export default function TransactionTable({
             {transactions.map((t) => (
               <tr key={t.id} className="hover:bg-slate-50">
                 <Td>
-                  <span className="text-xs text-slate-600">
+                  <Link
+                    to={`/transactions/${t.id}`}
+                    className="text-xs text-slate-600 hover:text-brand-600 hover:underline"
+                  >
                     {formatDateTime(t.created_at)}
-                  </span>
+                  </Link>
                 </Td>
                 <Td>
                   <TypeBadge type={t.type} />
@@ -106,9 +110,12 @@ export default function TransactionTable({
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center gap-2">
                   <TypeBadge type={t.type} />
-                  <span className="text-xs text-slate-500">
+                  <Link
+                    to={`/transactions/${t.id}`}
+                    className="text-xs text-slate-500 hover:text-brand-600 hover:underline"
+                  >
                     {formatDateTime(t.created_at)}
-                  </span>
+                  </Link>
                 </div>
                 {!hideProductColumn && (
                   <>
