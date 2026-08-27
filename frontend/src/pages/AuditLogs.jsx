@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ScrollText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -21,10 +22,13 @@ import AuditLogTable from '../components/auditLogs/AuditLogTable';
 const PAGE_SIZE = 20;
 
 export default function AuditLogs() {
+  const [searchParams] = useSearchParams();
+
   const [action, setAction] = useState(null);
   const [entity, setEntity] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [userId, setUserId] = useState(() => searchParams.get('userId'));
   const [page, setPage] = useState(1);
 
   const [logs, setLogs] = useState([]);
@@ -49,6 +53,7 @@ export default function AuditLogs() {
         entity: entity || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        userId: userId || undefined,
         page,
         limit: PAGE_SIZE,
       });
@@ -64,11 +69,11 @@ export default function AuditLogs() {
   useEffect(() => {
     loadLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [action, entity, startDate, endDate, page]);
+  }, [action, entity, startDate, endDate, userId, page]);
 
   useEffect(() => {
     setPage(1);
-  }, [action, entity, startDate, endDate]);
+  }, [action, entity, startDate, endDate, userId]);
 
   return (
     <DashboardLayout title="Audit Logs">
@@ -90,6 +95,9 @@ export default function AuditLogs() {
             onStartDateChange={setStartDate}
             endDate={endDate}
             onEndDateChange={setEndDate}
+            userId={userId}
+            onUserIdChange={setUserId}
+            users={users}
             disabled={loading}
           />
         </div>
@@ -101,7 +109,7 @@ export default function AuditLogs() {
             icon={ScrollText}
             title="No audit logs found"
             description={
-              action || entity || startDate || endDate
+              action || entity || startDate || endDate || userId
                 ? 'Try adjusting your filters.'
                 : 'System activity will appear here as it happens.'
             }
