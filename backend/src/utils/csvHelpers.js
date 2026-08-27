@@ -7,11 +7,15 @@
 
 function escapeCsvValue(value) {
   const str = String(value ?? '');
-  if (str.includes(',')) {
-    return `"${str}"`;
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
 }
+
+// Leading UTF-8 BOM so Excel on Windows doesn't guess the encoding wrong
+// and mangle non-ASCII characters (accented names, etc.) into mojibake.
+const UTF8_BOM = '﻿';
 
 function toCsv(columns, rows) {
   const header = columns.map((c) => escapeCsvValue(c.label)).join(',');
@@ -20,7 +24,7 @@ function toCsv(columns, rows) {
       .map((c) => escapeCsvValue(c.format ? c.format(row[c.key], row) : row[c.key]))
       .join(',')
   );
-  return [header, ...lines].join('\r\n');
+  return UTF8_BOM + [header, ...lines].join('\r\n');
 }
 
 module.exports = { toCsv };
