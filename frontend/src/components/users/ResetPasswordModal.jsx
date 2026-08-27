@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
@@ -14,18 +15,23 @@ export default function ResetPasswordModal({ open, user = null, onSave, onClose 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setNewPassword('');
     setConfirmPassword('');
     setError('');
+    setShowPassword(false);
   }, [open]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     if (newPassword.length < 8) {
       return setError('At least 8 characters');
+    }
+    if (newPassword !== confirmPassword) {
+      return setError('Passwords do not match');
     }
 
     setSubmitting(true);
@@ -73,13 +79,23 @@ export default function ResetPasswordModal({ open, user = null, onSave, onClose 
           <Input
             label="New Password"
             name="newPassword"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             required
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             helper="At least 8 characters"
             disabled={submitting}
             autoFocus
+            suffix={
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword((v) => !v)}
+                className="pointer-events-auto text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            }
           />
           {newPassword && (
             <div className="mt-2">
@@ -99,7 +115,7 @@ export default function ResetPasswordModal({ open, user = null, onSave, onClose 
         <Input
           label="Confirm New Password"
           name="confirmPassword"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           required
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}

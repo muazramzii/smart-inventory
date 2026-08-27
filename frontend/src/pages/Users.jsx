@@ -236,14 +236,16 @@ function UserCard({
             <Button size="sm" variant="secondary" icon={Pencil} onClick={() => onEdit(u)}>
               Edit
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={KeyRound}
-              onClick={() => onRequestResetPassword(u)}
-            >
-              Reset Password
-            </Button>
+            {u.is_active && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={KeyRound}
+                onClick={() => onRequestResetPassword(u)}
+              >
+                Reset Password
+              </Button>
+            )}
             <Button
               size="sm"
               variant="ghost"
