@@ -5,6 +5,8 @@
 
 const UserModel = require('../models/userModel');
 const { hashPassword } = require('../utils/hash');
+const { recordAudit } = require('../utils/auditLogger');
+const { AUDIT_ACTIONS, AUDIT_ENTITIES } = require('../constants/auditActions');
 
 const UserController = {
   async list(req, res, next) {
@@ -35,6 +37,15 @@ const UserController = {
       const id = await UserModel.create({ name, email, password_hash, role });
       const created = await UserModel.findById(id);
 
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.USER_CREATE,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: id,
+        details: { name, email, role },
+      });
+
       res.status(201).json({ success: true, data: created });
     } catch (err) {
       next(err);
@@ -52,6 +63,15 @@ const UserController = {
       await UserModel.update(id, req.body);
       const updated = await UserModel.findById(id);
 
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.USER_UPDATE,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: id,
+        details: { fields: Object.keys(req.body) },
+      });
+
       res.json({ success: true, data: updated });
     } catch (err) {
       next(err);
@@ -67,6 +87,15 @@ const UserController = {
       }
 
       await UserModel.update(id, { is_active: false });
+
+      recordAudit({
+        req,
+        userId: req.user.id,
+        action: AUDIT_ACTIONS.USER_DEACTIVATE,
+        entity: AUDIT_ENTITIES.USER,
+        entityId: id,
+        details: { name: existing.name, email: existing.email },
+      });
 
       res.json({ success: true, message: 'User deactivated' });
     } catch (err) {
