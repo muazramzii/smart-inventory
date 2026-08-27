@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ScrollText, Pencil, KeyRound, UserX, UserCheck } from 'lucide-react';
+import { ScrollText, Pencil, KeyRound, UserX, UserCheck, SearchX, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { userApi } from '../api/userApi';
@@ -15,6 +15,8 @@ import { useAuth } from '../hooks/useAuth';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import Button from '../components/common/Button';
+import EmptyState from '../components/common/EmptyState';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import AuditLogTable from '../components/auditLogs/AuditLogTable';
 import UserFormModal from '../components/users/UserFormModal';
 import ResetPasswordModal from '../components/users/ResetPasswordModal';
@@ -27,16 +29,43 @@ export default function UserDetail() {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [recentLogs, setRecentLogs] = useState([]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    setNotFound(false);
+    try {
+      const data = await userApi.getOne(id);
+      setUser(data);
+      const { data: logs } = await auditLogApi.list({ userId: id, limit: 5 });
+      setRecentLogs(logs);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setNotFound(true);
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to load user');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleSave = async (payload) => {
     await userApi.update(id, payload);
     toast.success('User updated');
     setFormOpen(false);
+    load();
   };
 
   const handleResetPassword = async (newPassword) => {
@@ -45,51 +74,56 @@ export default function UserDetail() {
     setResetOpen(false);
   };
 
-  const toggleActive = async () => {
-    if (user.is_active) {
-      setDeactivating(true);
-      try {
-        await userApi.deactivate(id);
-        toast.success(`"${user.name}" deactivated`);
-        setUser((u) => ({ ...u, is_active: false }));
-      } catch (err) {
-        toast.error(err.response?.data?.message || 'Deactivate failed');
-      } finally {
-        setDeactivating(false);
-      }
-    } else {
-      try {
-        await userApi.update(id, { is_active: true });
-        toast.success(`"${user.name}" reactivated`);
-        setUser((u) => ({ ...u, is_active: true }));
-      } catch (err) {
-        toast.error(err.response?.data?.message || 'Action failed');
-      }
+  const confirmDeactivate = async () => {
+    setDeactivating(true);
+    try {
+      await userApi.deactivate(id);
+      toast.success(`"${user.name}" deactivated`);
+      setUser((u) => ({ ...u, is_active: false }));
+      setDeactivateConfirmOpen(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Deactivate failed');
+    } finally {
+      setDeactivating(false);
     }
   };
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const data = await userApi.getOne(id);
-        setUser(data);
-        const { data: logs } = await auditLogApi.list({ userId: id, limit: 5 });
-        setRecentLogs(logs);
-      } catch (err) {
-        toast.error(err.response?.data?.message || 'Failed to load user');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id]);
+  const activate = async () => {
+    try {
+      await userApi.update(id, { is_active: true });
+      toast.success(`"${user.name}" reactivated`);
+      setUser((u) => ({ ...u, is_active: true }));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Action failed');
+    }
+  };
 
   if (loading) {
     return (
       <DashboardLayout title="User Detail">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <Loader label="Loading user..." />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (notFound || !user) {
+    return (
+      <DashboardLayout title="User Not Found">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <EmptyState
+            icon={SearchX}
+            title="User not found"
+            description="This account may have been removed, or the link is incorrect."
+            action={
+              <Link to="/users">
+                <Button variant="secondary" icon={ArrowLeft}>
+                  Back to Users
+                </Button>
+              </Link>
+            }
+          />
         </div>
       </DashboardLayout>
     );
@@ -144,8 +178,7 @@ export default function UserDetail() {
                 size="sm"
                 variant="ghost"
                 icon={user.is_active ? UserX : UserCheck}
-                onClick={toggleActive}
-                loading={deactivating}
+                onClick={() => (user.is_active ? setDeactivateConfirmOpen(true) : activate())}
                 className={
                   user.is_active
                     ? 'text-red-600 hover:bg-red-50'
@@ -190,6 +223,21 @@ export default function UserDetail() {
         user={user}
         onSave={handleResetPassword}
         onClose={() => setResetOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={deactivateConfirmOpen}
+        title="Deactivate user?"
+        message={
+          <>
+            Deactivate <strong>{user.name}</strong>? They will no longer be
+            able to log in. You can reactivate them later.
+          </>
+        }
+        confirmLabel="Deactivate"
+        loading={deactivating}
+        onConfirm={confirmDeactivate}
+        onCancel={() => setDeactivateConfirmOpen(false)}
       />
     </DashboardLayout>
   );
