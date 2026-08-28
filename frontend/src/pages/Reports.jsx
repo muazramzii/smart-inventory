@@ -13,6 +13,7 @@ import {
   ArrowLeftRight,
   CalendarDays,
   Truck,
+  Users as UsersIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -48,6 +49,8 @@ export default function Reports() {
   const [loadingTxCsv, setLoadingTxCsv] = useState(false);
   const [loadingSup, setLoadingSup] = useState(false);
   const [loadingSupCsv, setLoadingSupCsv] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingUsersCsv, setLoadingUsersCsv] = useState(false);
 
   // ---- Transaction filter state ----
   const [startDate, setStartDate] = useState('');
@@ -164,6 +167,30 @@ export default function Reports() {
       toast.error(err.response?.data?.message || 'Download failed');
     } finally {
       setLoadingSupCsv(false);
+    }
+  };
+
+  const downloadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      await reportApi.users();
+      toast.success('User roster downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const downloadUsersCsv = async () => {
+    setLoadingUsersCsv(true);
+    try {
+      await reportApi.usersCsv();
+      toast.success('User roster CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingUsersCsv(false);
     }
   };
 
@@ -294,6 +321,18 @@ export default function Reports() {
           onDownload={downloadSuppliers}
           onDownloadCsv={downloadSuppliersCsv}
           loadingCsv={loadingSupCsv}
+        />
+
+        {/* Card 5: User roster */}
+        <ReportCard
+          icon={UsersIcon}
+          title="User Roster"
+          description="All system accounts with role and active status."
+          accent="amber"
+          loading={loadingUsers}
+          onDownload={downloadUsers}
+          onDownloadCsv={downloadUsersCsv}
+          loadingCsv={loadingUsersCsv}
         />
       </div>
 
