@@ -425,20 +425,29 @@ const ReportController = {
         { label: 'Total Users', value: String(users.length) },
       ]);
 
-      drawTable(doc, {
-        columns: [
-          { label: 'Name',   key: 'name',       width: 120 },
-          { label: 'Email',  key: 'email',       width: 160 },
-          { label: 'Role',   key: 'role',        width: 70, align: 'center' },
-          { label: 'Status', key: 'is_active',   width: 60, align: 'center',
-            format: (v) => (v ? 'Active' : 'Inactive') },
-          { label: 'Added On', key: 'created_at', width: 90,
-            format: (v) => new Date(v).toLocaleDateString('en-US', {
-              year: 'numeric', month: 'short', day: 'numeric',
-            }) },
-        ],
-        rows: users,
-      });
+      if (users.length === 0) {
+        doc
+          .moveDown(2)
+          .font('Helvetica')
+          .fontSize(11)
+          .fillColor('#64748b')
+          .text('No user accounts found.', { align: 'center' });
+      } else {
+        drawTable(doc, {
+          columns: [
+            { label: 'Name',   key: 'name',       width: 120 },
+            { label: 'Email',  key: 'email',       width: 160 },
+            { label: 'Role',   key: 'role',        width: 70, align: 'center' },
+            { label: 'Status', key: 'is_active',   width: 60, align: 'center',
+              format: (v) => (v ? 'Active' : 'Inactive') },
+            { label: 'Added On', key: 'created_at', width: 90,
+              format: (v) => new Date(v).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+              }) },
+          ],
+          rows: users,
+        });
+      }
 
       drawFooter(doc);
       doc.end();
