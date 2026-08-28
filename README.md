@@ -22,7 +22,7 @@ A modern, production-quality inventory management web application designed for s
 - ⚠️ **Low-stock alerts** — Per-product thresholds with reorder suggestions, plus a Navbar bell visible from anywhere in the app
 - 📋 **Transaction history** — Complete audit trail with date/type/supplier filters and reversal capability
 - 🧾 **Transaction detail page** — Full receipt-style view of a single stock movement, linked from the product involved
-- 📄 **PDF & CSV report exports** — Inventory snapshot, low-stock alerts, transaction history with date ranges
+- 📄 **PDF & CSV report exports** — Inventory snapshot, low-stock alerts, transaction history with date ranges, supplier roster, and user roster
 - 🏷️ **Categories management** — Organize products with friendly product counts, and a category detail page listing everything filed under it
 - 🚚 **Suppliers management** — Track contacts, click-to-call/email links, and a supplier detail page with full transaction history
 - 👤 **User profile** — Account info, password change with strength meter

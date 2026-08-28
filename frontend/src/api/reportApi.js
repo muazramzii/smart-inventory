@@ -107,6 +107,38 @@ export const reportApi = {
     );
   },
 
+  suppliers() {
+    return downloadPdf(
+      '/reports/suppliers.pdf',
+      {},
+      `supplier-roster-${stamp()}.pdf`
+    );
+  },
+
+  suppliersCsv() {
+    return downloadCsv(
+      '/reports/suppliers.csv',
+      {},
+      `supplier-roster-${stamp()}.csv`
+    );
+  },
+
+  users() {
+    return downloadPdf(
+      '/reports/users.pdf',
+      {},
+      `user-roster-${stamp()}.pdf`
+    );
+  },
+
+  usersCsv() {
+    return downloadCsv(
+      '/reports/users.csv',
+      {},
+      `user-roster-${stamp()}.csv`
+    );
+  },
+
   auditLogs({ action, entity, userId, startDate, endDate } = {}) {
     return downloadPdf(
       '/reports/audit-logs.pdf',
