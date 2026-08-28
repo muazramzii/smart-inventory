@@ -93,7 +93,7 @@ export default function Transactions() {
 
   useEffect(() => {
     setPage(1);
-  }, [type, startDate, endDate, productId]);
+  }, [type, startDate, endDate, productId, supplierId]);
 
   // Refresh products list (for live stock in modal)
   const refreshProducts = async () => {
