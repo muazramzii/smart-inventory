@@ -11,6 +11,11 @@ export const supplierApi = {
     return data.data;
   },
 
+  async getOne(id) {
+    const { data } = await api.get(`/suppliers/${id}`);
+    return data.data;
+  },
+
   async create(payload) {
     const { data } = await api.post('/suppliers', payload);
     return data.data;
