@@ -25,7 +25,7 @@ A modern, production-quality inventory management web application designed for s
 - 📄 **PDF & CSV report exports** — Inventory snapshot, low-stock alerts, transaction history with date ranges, supplier roster, and user roster
 - 🏷️ **Categories management** — Organize products with friendly product counts, and a category detail page listing everything filed under it
 - 🚚 **Suppliers management** — Track contacts, click-to-call/email links, and a supplier detail page with full transaction history
-- 👤 **User profile** — Account info, password change with strength meter
+- 👤 **User profile** — Account info, password change with strength meter, reachable from the navbar dropdown
 - 🧑‍💼 **User management** — Admin-only account creation, role assignment, activate/deactivate, and password reset
 - 🪪 **User detail page** — Account info, recent activity preview, and admin actions in one place
 - 🕵️ **Audit logs** — Admin-only trail of logins, password changes, product edits, and stock movements, filterable by user with a direct link from the Users page, exportable as PDF or CSV; entity references link straight to the record's detail page

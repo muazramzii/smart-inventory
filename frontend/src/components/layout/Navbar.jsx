@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Menu, ChevronDown, LogOut, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
@@ -80,13 +81,14 @@ export default function Navbar({ onMenuClick, title = 'Dashboard' }) {
                 <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
                 <p className="truncate text-xs text-slate-500">{user?.email}</p>
               </div>
-              <button
-                disabled
-                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-400"
+              <Link
+                to="/profile"
+                onClick={() => setMenuOpen(false)}
+                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
               >
                 <User size={16} />
-                Profile (coming soon)
-              </button>
+                Profile
+              </Link>
               <button
                 onClick={onLogout}
                 className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
