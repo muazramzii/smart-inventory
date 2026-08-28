@@ -83,7 +83,8 @@ export default function Navbar({ onMenuClick, title = 'Dashboard' }) {
               </div>
               <Link
                 to="/profile"
-                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-400"
+                onClick={() => setMenuOpen(false)}
+                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
               >
                 <User size={16} />
                 Profile
