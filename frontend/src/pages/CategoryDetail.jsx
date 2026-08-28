@@ -44,6 +44,10 @@ export default function CategoryDetail() {
   const [productPage, setProductPage] = useState(1);
 
   useEffect(() => {
+    setProductPage(1);
+  }, [id]);
+
+  useEffect(() => {
     const load = async () => {
       setLoading(true);
       setNotFound(false);

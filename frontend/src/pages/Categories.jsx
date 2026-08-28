@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Tags } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -130,7 +131,12 @@ export default function Categories() {
                   <Tags size={18} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900">{c.name}</p>
+                  <Link
+                    to={`/categories/${c.id}`}
+                    className="font-medium text-slate-900 hover:text-brand-600 hover:underline"
+                  >
+                    {c.name}
+                  </Link>
                   {c.description && (
                     <p className="truncate text-sm text-slate-500">
                       {c.description}
