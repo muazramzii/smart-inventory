@@ -430,7 +430,8 @@ const ReportController = {
           { label: 'Name',   key: 'name',       width: 120 },
           { label: 'Email',  key: 'email',       width: 160 },
           { label: 'Role',   key: 'role',        width: 70, align: 'center' },
-          { label: 'Status', key: 'is_active',   width: 60, align: 'center' },
+          { label: 'Status', key: 'is_active',   width: 60, align: 'center',
+            format: (v) => (v ? 'Active' : 'Inactive') },
           { label: 'Added On', key: 'created_at', width: 90,
             format: (v) => new Date(v).toLocaleDateString('en-US', {
               year: 'numeric', month: 'short', day: 'numeric',
@@ -455,7 +456,7 @@ const ReportController = {
           { label: 'Name', key: 'name' },
           { label: 'Email', key: 'email' },
           { label: 'Role', key: 'role' },
-          { label: 'Status', key: 'is_active' },
+          { label: 'Status', key: 'is_active', format: (v) => (v ? 'Active' : 'Inactive') },
           { label: 'Added On', key: 'created_at' },
         ],
         users
