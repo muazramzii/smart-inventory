@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------------
 
 import { Link } from 'react-router-dom';
-import { Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { Pencil, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
 import Button from '../common/Button';
 import { formatCurrency, formatNumber } from '../../utils/format';
 
@@ -14,6 +14,7 @@ export default function ProductTable({
   isAdmin,
   onEdit,
   onDelete,
+  onReactivate,
 }) {
   return (
     <>
@@ -42,12 +43,19 @@ export default function ProductTable({
                     <span className="font-mono text-xs">{p.sku}</span>
                   </Td>
                   <Td>
-                    <Link
-                      to={`/products/${p.id}`}
-                      className="font-medium text-slate-900 hover:text-brand-600 hover:underline"
-                    >
-                      {p.name}
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        to={`/products/${p.id}`}
+                        className="font-medium text-slate-900 hover:text-brand-600 hover:underline"
+                      >
+                        {p.name}
+                      </Link>
+                      {!p.is_active && (
+                        <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
                     {p.description && (
                       <div className="truncate text-xs text-slate-500">
                         {p.description}
@@ -85,23 +93,37 @@ export default function ProductTable({
                   {isAdmin && (
                     <Td align="right">
                       <div className="flex justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          icon={Pencil}
-                          onClick={() => onEdit(p)}
-                          aria-label={`Edit ${p.name}`}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          icon={Trash2}
-                          onClick={() => onDelete(p)}
-                          aria-label={`Delete ${p.name}`}
-                          className="text-red-600 hover:bg-red-50"
-                        />
+                        {p.is_active ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              icon={Pencil}
+                              onClick={() => onEdit(p)}
+                              aria-label={`Edit ${p.name}`}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              icon={Trash2}
+                              onClick={() => onDelete(p)}
+                              aria-label={`Delete ${p.name}`}
+                              className="text-red-600 hover:bg-red-50"
+                            />
+                          </>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            icon={RotateCcw}
+                            onClick={() => onReactivate(p)}
+                            aria-label={`Reactivate ${p.name}`}
+                          >
+                            Reactivate
+                          </Button>
+                        )}
                       </div>
                     </Td>
                   )}
