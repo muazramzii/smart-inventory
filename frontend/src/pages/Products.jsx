@@ -98,7 +98,7 @@ export default function Products() {
   // Reset to page 1 whenever a filter changes
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, categoryId, lowStockOnly]);
+  }, [debouncedSearch, categoryId, lowStockOnly, showInactive]);
 
   // ---- Handlers ----
   const openCreate = () => {
@@ -203,19 +203,19 @@ export default function Products() {
           <EmptyState
             icon={Package}
             title={
-              search || categoryId || lowStockOnly
+              search || categoryId || lowStockOnly || showInactive
                 ? 'No products match your filters'
                 : 'No products yet'
             }
             description={
-              search || categoryId || lowStockOnly
+              search || categoryId || lowStockOnly || showInactive
                 ? 'Try clearing the filters or searching for something else.'
                 : isAdmin
                 ? 'Click "Add Product" to create your first one.'
                 : 'Ask an admin to add products to get started.'
             }
             action={
-              isAdmin && !(search || categoryId || lowStockOnly) ? (
+              isAdmin && !(search || categoryId || lowStockOnly || showInactive) ? (
                 <Button icon={Plus} onClick={openCreate}>
                   Add Product
                 </Button>
