@@ -5,28 +5,36 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Truck, Phone, Mail, MapPin, User, Inbox } from 'lucide-react';
+import { ArrowLeft, Truck, Phone, Mail, MapPin, User, Inbox, Pencil, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { supplierApi } from '../api/supplierApi';
 import { transactionApi } from '../api/transactionApi';
+import { useAuth } from '../hooks/useAuth';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
 import Pagination from '../components/common/Pagination';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import TransactionTable from '../components/transactions/TransactionTable';
+import SupplierFormModal from '../components/suppliers/SupplierFormModal';
 import { formatDate } from '../utils/format';
 
 const PAGE_SIZE = 20;
 
 export default function SupplierDetail() {
   const { id } = useParams();
+  const { isAdmin } = useAuth();
 
   const [supplier, setSupplier] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [transactions, setTransactions] = useState([]);
   const [txPagination, setTxPagination] = useState({
@@ -58,6 +66,26 @@ export default function SupplierDetail() {
     };
     load();
   }, [id, txPage]);
+
+  const handleSave = async (payload) => {
+    await supplierApi.update(supplier.id, payload);
+    toast.success('Supplier updated');
+    setFormOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await supplierApi.remove(deleteTarget.id);
+      toast.success(`"${deleteTarget.name}" deleted`);
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -99,7 +127,30 @@ export default function SupplierDetail() {
         >
           <ArrowLeft size={14} /> Back to Suppliers
         </Link>
-        <h2 className="text-xl font-bold text-slate-900">{supplier.name}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-bold text-slate-900">{supplier.name}</h2>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={Pencil}
+                onClick={() => setFormOpen(true)}
+              >
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={Trash2}
+                onClick={() => setDeleteTarget(supplier)}
+                className="text-red-600 hover:bg-red-50"
+              >
+                Delete
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -141,6 +192,30 @@ export default function SupplierDetail() {
           </>
         )}
       </div>
+
+      <SupplierFormModal
+        open={formOpen}
+        mode="edit"
+        supplier={supplier}
+        onSave={handleSave}
+        onClose={() => setFormOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete supplier?"
+        message={
+          <>
+            Delete <strong>{deleteTarget?.name}</strong>? Past transactions
+            referencing this supplier will keep their record but lose the
+            supplier link.
+          </>
+        }
+        confirmLabel="Delete"
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </DashboardLayout>
   );
 }
