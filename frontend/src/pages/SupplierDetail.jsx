@@ -44,6 +44,10 @@ export default function SupplierDetail() {
   const [txPage, setTxPage] = useState(1);
 
   useEffect(() => {
+    setTxPage(1);
+  }, [id]);
+
+  useEffect(() => {
     const load = async () => {
       setLoading(true);
       setNotFound(false);
@@ -183,7 +187,6 @@ export default function SupplierDetail() {
               transactions={transactions}
               isAdmin={false}
               onReverse={() => {}}
-              hideProductColumn
             />
             <Pagination
               page={txPagination.page}
