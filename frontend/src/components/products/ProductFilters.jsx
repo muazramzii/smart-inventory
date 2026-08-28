@@ -13,6 +13,8 @@ export default function ProductFilters({
   onCategoryChange,
   lowStockOnly,
   onLowStockChange,
+  showInactive,
+  onShowInactiveChange,
   categories = [],
 }) {
   return (
@@ -64,6 +66,19 @@ export default function ProductFilters({
         />
         Low stock only
       </label>
+
+      {/* Show inactive toggle */}
+      {onShowInactiveChange && (
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => onShowInactiveChange(e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+          />
+          Show inactive
+        </label>
+      )}
     </div>
   );
 }

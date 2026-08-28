@@ -15,7 +15,7 @@ A modern, production-quality inventory management web application designed for s
 - 🔐 **Secure authentication** — JWT-based login with bcrypt password hashing
 - 👥 **Role-based access** — Admin and Staff roles with granular permissions
 - 📊 **Dashboard analytics** — Real-time stats, 7-day activity chart, low-stock alerts, top products
-- 📦 **Full product management** — CRUD with search, category filters, pagination, soft deletes
+- 📦 **Full product management** — CRUD with search, category filters, pagination, soft deletes, and admin ability to view and restore deactivated products
 - 📥 **Bulk CSV import** — Paste CSV text to create many products at once, with a per-row success/failure report
 - 🔍 **Product detail page** — Per-product info, stock-movement stats, and full transaction history
 - 🔄 **Stock movement tracking** — Atomic stock-in/stock-out with row-level locking (no race conditions)

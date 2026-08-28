@@ -36,6 +36,7 @@ export default function Products() {
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState(null);
   const [lowStockOnly, setLowStockOnly] = useState(() => searchParams.get('lowStockOnly') === 'true');
+  const [showInactive, setShowInactive] = useState(false);
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search, 300);
 
@@ -76,6 +77,7 @@ export default function Products() {
         search: debouncedSearch || undefined,
         categoryId: categoryId || undefined,
         lowStockOnly: lowStockOnly ? 'true' : undefined,
+        includeInactive: isAdmin && showInactive ? 'true' : undefined,
         page,
         limit: PAGE_SIZE,
       });
@@ -91,12 +93,12 @@ export default function Products() {
   useEffect(() => {
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, categoryId, lowStockOnly, page]);
+  }, [debouncedSearch, categoryId, lowStockOnly, showInactive, page]);
 
   // Reset to page 1 whenever a filter changes
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, categoryId, lowStockOnly]);
+  }, [debouncedSearch, categoryId, lowStockOnly, showInactive]);
 
   // ---- Handlers ----
   const openCreate = () => {
@@ -146,6 +148,16 @@ export default function Products() {
     }
   };
 
+  const handleReactivate = async (product) => {
+    try {
+      await productApi.update(product.id, { is_active: true });
+      toast.success(`"${product.name}" reactivated`);
+      loadProducts();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Reactivate failed');
+    }
+  };
+
   return (
     <DashboardLayout title="Products">
       {/* Header bar */}
@@ -178,6 +190,8 @@ export default function Products() {
             onCategoryChange={setCategoryId}
             lowStockOnly={lowStockOnly}
             onLowStockChange={setLowStockOnly}
+            showInactive={showInactive}
+            onShowInactiveChange={isAdmin ? setShowInactive : undefined}
             categories={categories}
           />
         </div>
@@ -189,19 +203,19 @@ export default function Products() {
           <EmptyState
             icon={Package}
             title={
-              search || categoryId || lowStockOnly
+              search || categoryId || lowStockOnly || showInactive
                 ? 'No products match your filters'
                 : 'No products yet'
             }
             description={
-              search || categoryId || lowStockOnly
+              search || categoryId || lowStockOnly || showInactive
                 ? 'Try clearing the filters or searching for something else.'
                 : isAdmin
                 ? 'Click "Add Product" to create your first one.'
                 : 'Ask an admin to add products to get started.'
             }
             action={
-              isAdmin && !(search || categoryId || lowStockOnly) ? (
+              isAdmin && !(search || categoryId || lowStockOnly || showInactive) ? (
                 <Button icon={Plus} onClick={openCreate}>
                   Add Product
                 </Button>
@@ -215,6 +229,7 @@ export default function Products() {
               isAdmin={isAdmin}
               onEdit={openEdit}
               onDelete={(p) => setDeleteTarget(p)}
+              onReactivate={handleReactivate}
             />
             <Pagination
               page={pagination.page}
