@@ -80,6 +80,36 @@ The frontend communicates with the backend via REST APIs. The backend uses a con
 
 ---
 
+## 🚀 Deploying (Free Tier)
+
+This stack deploys entirely on free tiers — no credit card required anywhere.
+
+| Layer | Provider | Why |
+|---|---|---|
+| Database | [Aiven](https://aiven.io/free-mysql-database) | Always-free managed MySQL (1GB), no expiry |
+| Backend | [Render](https://render.com) | Free Node web service (spins down when idle, ~30-60s cold start) |
+| Frontend | [Vercel](https://vercel.com) | Free static hosting, auto-detects Vite |
+
+### 1. Database (Aiven)
+1. Sign up at Aiven, create a free MySQL service.
+2. Once it's running, grab the connection details (host, port, user, password, database name — Aiven's default DB is usually `defaultdb`).
+3. Connect with the CLI (or Aiven's web console) and run `backend/database/schema.sql` then `backend/database/seed.sql` against it.
+
+### 2. Backend (Render)
+1. Push this repo to GitHub, then create a new **Blueprint** on Render pointing at it — it'll pick up `render.yaml` at the repo root automatically.
+2. Fill in the env vars marked `sync: false` in `render.yaml` (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` from Aiven, and `CLIENT_URL` — leave a placeholder for now, you'll update it once the frontend is deployed).
+3. Deploy. Render generates a URL like `https://smart-inventory-backend.onrender.com`.
+
+### 3. Frontend (Vercel)
+1. Import the repo into Vercel, set the project root to `frontend/`.
+2. Add an env var `VITE_API_BASE_URL` = `https://<your-render-url>/api`.
+3. Deploy. Vercel generates a URL like `https://smart-inventory.vercel.app`.
+
+### 4. Close the loop
+Go back to Render and update `CLIENT_URL` to your Vercel URL (comma-separate multiple origins if needed, e.g. for a custom domain too), then redeploy the backend.
+
+---
+
 ## 📁 Project Structure
 
 smart-inventory/
