@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 
 import { reportApi } from '../api/reportApi';
 import { supplierApi } from '../api/supplierApi';
+import { useAuth } from '../hooks/useAuth';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ReportCard from '../components/reports/ReportCard';
 
@@ -40,6 +41,8 @@ const startOfMonth = () => {
 };
 
 export default function Reports() {
+  const { isAdmin } = useAuth();
+
   // ---- Loading flags per card, per format ----
   const [loadingInv, setLoadingInv] = useState(false);
   const [loadingInvCsv, setLoadingInvCsv] = useState(false);
@@ -323,17 +326,19 @@ export default function Reports() {
           loadingCsv={loadingSupCsv}
         />
 
-        {/* Card 5: User roster */}
-        <ReportCard
-          icon={UsersIcon}
-          title="User Roster"
-          description="All system accounts with role and active status."
-          accent="amber"
-          loading={loadingUsers}
-          onDownload={downloadUsers}
-          onDownloadCsv={downloadUsersCsv}
-          loadingCsv={loadingUsersCsv}
-        />
+        {/* Card 5: User roster (admin-only, matching /users itself) */}
+        {isAdmin && (
+          <ReportCard
+            icon={UsersIcon}
+            title="User Roster"
+            description="All system accounts with role and active status."
+            accent="amber"
+            loading={loadingUsers}
+            onDownload={downloadUsers}
+            onDownloadCsv={downloadUsersCsv}
+            loadingCsv={loadingUsersCsv}
+          />
+        )}
       </div>
 
       {/* Tip box */}
