@@ -12,6 +12,7 @@ import Transactions from '../pages/Transactions';
 import TransactionDetail from '../pages/TransactionDetail';
 import Reports from '../pages/Reports';
 import Categories from '../pages/Categories';
+import CategoryDetail from '../pages/CategoryDetail';
 import Suppliers from '../pages/Suppliers';
 import SupplierDetail from '../pages/SupplierDetail';
 import Profile from '../pages/Profile';
@@ -31,6 +32,7 @@ export default function AppRoutes() {
       <Route path="/transactions"     element={<PrivateRoute><Transactions /></PrivateRoute>} />
       <Route path="/transactions/:id" element={<PrivateRoute><TransactionDetail /></PrivateRoute>} />
       <Route path="/categories"   element={<PrivateRoute><Categories /></PrivateRoute>} />
+      <Route path="/categories/:id" element={<PrivateRoute><CategoryDetail /></PrivateRoute>} />
       <Route path="/suppliers"    element={<PrivateRoute><Suppliers /></PrivateRoute>} />
       <Route path="/suppliers/:id" element={<PrivateRoute><SupplierDetail /></PrivateRoute>} />
       <Route path="/reports"      element={<PrivateRoute><Reports /></PrivateRoute>} />
