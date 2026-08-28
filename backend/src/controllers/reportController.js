@@ -408,6 +408,65 @@ const ReportController = {
     }
   },
 
+  async users(req, res, next) {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      const users = await UserModel.findAll();
+
+      const doc = startPdf(res, `user-roster-${Date.now()}.pdf`);
+
+      drawHeader(doc, {
+        title: 'User Roster',
+        subtitle: 'All system accounts',
+        generatedBy: user ? `${user.name} (${user.role})` : '',
+      });
+
+      drawSummary(doc, [
+        { label: 'Total Users', value: String(users.length) },
+      ]);
+
+      drawTable(doc, {
+        columns: [
+          { label: 'Name',   key: 'name',       width: 120 },
+          { label: 'Email',  key: 'email',       width: 160 },
+          { label: 'Role',   key: 'role',        width: 70, align: 'center' },
+          { label: 'Status', key: 'is_active',   width: 60, align: 'center' },
+          { label: 'Added On', key: 'created_at', width: 90,
+            format: (v) => new Date(v).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'short', day: 'numeric',
+            }) },
+        ],
+        rows: users,
+      });
+
+      drawFooter(doc);
+      doc.end();
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async usersCsv(req, res, next) {
+    try {
+      const users = await UserModel.findAll();
+
+      const csv = toCsv(
+        [
+          { label: 'Name', key: 'name' },
+          { label: 'Email', key: 'email' },
+          { label: 'Role', key: 'role' },
+          { label: 'Status', key: 'is_active' },
+          { label: 'Added On', key: 'created_at' },
+        ],
+        users
+      );
+
+      sendCsv(res, `user-roster-${Date.now()}.csv`, csv);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async auditLogs(req, res, next) {
     try {
       const user = await UserModel.findById(req.user.id);

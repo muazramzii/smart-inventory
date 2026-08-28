@@ -18,6 +18,7 @@ router.use(authMiddleware);
 router.get('/inventory.pdf', ReportController.inventory);
 router.get('/low-stock.pdf', ReportController.lowStock);
 router.get('/suppliers.pdf', ReportController.suppliers);
+router.get('/users.pdf', ReportController.users);
 
 router.get(
   '/transactions.pdf',
@@ -34,6 +35,7 @@ router.get(
 router.get('/inventory.csv', ReportController.inventoryCsv);
 router.get('/low-stock.csv', ReportController.lowStockCsv);
 router.get('/suppliers.csv', ReportController.suppliersCsv);
+router.get('/users.csv', ReportController.usersCsv);
 
 router.get(
   '/transactions.csv',
