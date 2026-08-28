@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Tags, Package, Pencil, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -26,6 +26,7 @@ const PAGE_SIZE = 20;
 
 export default function CategoryDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
 
   const [category, setCategory] = useState(null);
@@ -68,7 +69,8 @@ export default function CategoryDetail() {
   }, [id, productPage]);
 
   const handleSave = async (payload) => {
-    await categoryApi.update(category.id, payload);
+    const updated = await categoryApi.update(category.id, payload);
+    setCategory(updated);
     toast.success('Category updated');
     setFormOpen(false);
   };
@@ -80,6 +82,7 @@ export default function CategoryDetail() {
       await categoryApi.remove(deleteTarget.id);
       toast.success(`"${deleteTarget.name}" deleted`);
       setDeleteTarget(null);
+      navigate('/categories');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Delete failed');
     } finally {
