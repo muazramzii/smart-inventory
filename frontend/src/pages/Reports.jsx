@@ -6,7 +6,7 @@
 //   3. Transaction history (date range + type filters with quick presets)
 // ----------------------------------------------------------------------------
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FileSpreadsheet,
   AlertTriangle,
@@ -16,6 +16,7 @@ import {
 import toast from 'react-hot-toast';
 
 import { reportApi } from '../api/reportApi';
+import { supplierApi } from '../api/supplierApi';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ReportCard from '../components/reports/ReportCard';
 
@@ -49,6 +50,12 @@ export default function Reports() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [txType, setTxType] = useState('');
+  const [txSupplierId, setTxSupplierId] = useState('');
+  const [suppliers, setSuppliers] = useState([]);
+
+  useEffect(() => {
+    supplierApi.list().then(setSuppliers).catch(() => {});
+  }, []);
 
   // ---- Handlers ----
   const downloadInventory = async () => {
@@ -106,6 +113,7 @@ export default function Reports() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         type: txType || undefined,
+        supplierId: txSupplierId || undefined,
       });
       toast.success('Transaction report downloaded');
     } catch (err) {
@@ -122,6 +130,7 @@ export default function Reports() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         type: txType || undefined,
+        supplierId: txSupplierId || undefined,
       });
       toast.success('Transaction CSV downloaded');
     } catch (err) {
@@ -230,6 +239,20 @@ export default function Reports() {
               <option value="">All movement types</option>
               <option value="IN">Stock IN only</option>
               <option value="OUT">Stock OUT only</option>
+            </select>
+
+            {/* Supplier */}
+            <select
+              value={txSupplierId}
+              onChange={(e) => setTxSupplierId(e.target.value)}
+              className="block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+            >
+              <option value="">All suppliers</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
             </select>
           </div>
         </ReportCard>

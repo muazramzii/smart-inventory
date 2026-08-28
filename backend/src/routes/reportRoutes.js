@@ -24,6 +24,7 @@ router.get(
     query('startDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
     query('endDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
     query('type').optional().isIn(['IN', 'OUT']),
+    query('supplierId').optional().isInt({ min: 1 }),
   ],
   validate,
   ReportController.transactions
@@ -38,6 +39,7 @@ router.get(
     query('startDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
     query('endDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
     query('type').optional().isIn(['IN', 'OUT']),
+    query('supplierId').optional().isInt({ min: 1 }),
   ],
   validate,
   ReportController.transactionsCsv

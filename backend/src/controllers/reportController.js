@@ -7,6 +7,7 @@ const PDFDocument = require('pdfkit');
 
 const ProductModel = require('../models/productModel');
 const TransactionModel = require('../models/transactionModel');
+const SupplierModel = require('../models/supplierModel');
 const UserModel = require('../models/userModel');
 const AuditLogModel = require('../models/auditLogModel');
 
@@ -228,12 +229,14 @@ const ReportController = {
   async transactions(req, res, next) {
     try {
       const user = await UserModel.findById(req.user.id);
-      const { startDate, endDate, type } = req.query;
+      const { startDate, endDate, type, supplierId } = req.query;
+      const parsedSupplierId = supplierId ? parseInt(supplierId, 10) : null;
 
       const { data: txs } = await TransactionModel.findAll({
         startDate: startDate || null,
         endDate: endDate || null,
         type: type || null,
+        supplierId: parsedSupplierId,
         page: 1,
         limit: 1000,
       });
@@ -251,11 +254,13 @@ const ReportController = {
         ? `From ${startDate || '—'} to ${endDate || '—'}`
         : 'All dates';
 
+      const supplier = parsedSupplierId ? await SupplierModel.findById(parsedSupplierId) : null;
+
       const doc = startPdf(res, `transactions-report-${Date.now()}.pdf`);
 
       drawHeader(doc, {
         title: 'Transaction History Report',
-        subtitle: dateRange + (type ? `  •  Type: ${type}` : ''),
+        subtitle: dateRange + (type ? `  •  Type: ${type}` : '') + (supplier ? `  •  Supplier: ${supplier.name}` : ''),
         generatedBy: user ? `${user.name} (${user.role})` : '',
       });
 
@@ -306,12 +311,13 @@ const ReportController = {
 
   async transactionsCsv(req, res, next) {
     try {
-      const { startDate, endDate, type } = req.query;
+      const { startDate, endDate, type, supplierId } = req.query;
 
       const { data: txs } = await TransactionModel.findAll({
         startDate: startDate || null,
         endDate: endDate || null,
         type: type || null,
+        supplierId: supplierId ? parseInt(supplierId, 10) : null,
         page: 1,
         limit: 1000,
       });

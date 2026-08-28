@@ -22,6 +22,7 @@ router.get(
     query('type').optional().isIn(['IN', 'OUT']),
     query('productId').optional().isInt({ min: 1 }),
     query('userId').optional().isInt({ min: 1 }),
+    query('supplierId').optional().isInt({ min: 1 }),
     query('startDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('startDate must be YYYY-MM-DD'),
     query('endDate').optional().matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('endDate must be YYYY-MM-DD'),
     query('page').optional().isInt({ min: 1 }),

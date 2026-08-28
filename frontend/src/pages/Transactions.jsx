@@ -33,6 +33,7 @@ export default function Transactions() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [productId, setProductId] = useState(null);
+  const [supplierId, setSupplierId] = useState(null);
   const [page, setPage] = useState(1);
 
   // ---- Data ----
@@ -72,6 +73,7 @@ export default function Transactions() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         productId: productId || undefined,
+        supplierId: supplierId || undefined,
         page,
         limit: PAGE_SIZE,
       });
@@ -87,11 +89,11 @@ export default function Transactions() {
   useEffect(() => {
     loadTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, startDate, endDate, productId, page]);
+  }, [type, startDate, endDate, productId, supplierId, page]);
 
   useEffect(() => {
     setPage(1);
-  }, [type, startDate, endDate, productId]);
+  }, [type, startDate, endDate, productId, supplierId]);
 
   // Refresh products list (for live stock in modal)
   const refreshProducts = async () => {
@@ -183,7 +185,10 @@ export default function Transactions() {
             onEndDateChange={setEndDate}
             productId={productId}
             onProductChange={setProductId}
+            supplierId={supplierId}
+            onSupplierChange={setSupplierId}
             products={products}
+            suppliers={suppliers}
           />
         </div>
 
@@ -194,7 +199,7 @@ export default function Transactions() {
             icon={Inbox}
             title="No transactions found"
             description={
-              type || startDate || endDate || productId
+              type || startDate || endDate || productId || supplierId
                 ? 'Try adjusting your filters.'
                 : 'Record your first stock movement to get started.'
             }

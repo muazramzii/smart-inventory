@@ -87,6 +87,7 @@ const TransactionModel = {
       type = null,
       productId = null,
       userId = null,
+      supplierId = null,
       startDate = null,
       endDate = null,
       page = 1,
@@ -107,6 +108,10 @@ const TransactionModel = {
     if (userId) {
       where.push('t.user_id = ?');
       params.push(userId);
+    }
+    if (supplierId) {
+      where.push('t.supplier_id = ?');
+      params.push(supplierId);
     }
     if (startDate) {
       where.push('t.created_at >= ?');
