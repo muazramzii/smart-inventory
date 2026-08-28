@@ -95,7 +95,7 @@ function EntityRef({ entity, entityId }) {
   const path = entityDetailPath(entity, entityId);
   if (!path) return `${entity} #${entityId}`;
   return (
-    <Link to={path}>
+    <Link to={path} className="hover:text-brand-600 hover:underline">
       {entity} #{entityId}
     </Link>
   );
