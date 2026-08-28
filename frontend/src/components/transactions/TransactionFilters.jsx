@@ -14,7 +14,10 @@ export default function TransactionFilters({
   onEndDateChange,
   productId,
   onProductChange,
+  supplierId,
+  onSupplierChange,
   products = [],
+  suppliers = [],
 }) {
   const hasFilters = type || startDate || endDate || productId;
 
@@ -73,6 +76,18 @@ export default function TransactionFilters({
           {products.map((p) => (
             <option key={p.id} value={p.id}>
               {p.sku} — {p.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={supplierId || ''}
+          onChange={(e) => onSupplierChange(e.target.value || null)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 sm:flex-1"
+        >
+          <option value="">All suppliers</option>
+          {suppliers.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
             </option>
           ))}
         </select>
