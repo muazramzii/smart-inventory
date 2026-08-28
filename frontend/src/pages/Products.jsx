@@ -148,6 +148,16 @@ export default function Products() {
     }
   };
 
+  const handleReactivate = async (product) => {
+    try {
+      await productApi.update(product.id, { is_active: true });
+      toast.success(`"${product.name}" reactivated`);
+      loadProducts();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Reactivate failed');
+    }
+  };
+
   return (
     <DashboardLayout title="Products">
       {/* Header bar */}
@@ -219,6 +229,7 @@ export default function Products() {
               isAdmin={isAdmin}
               onEdit={openEdit}
               onDelete={(p) => setDeleteTarget(p)}
+              onReactivate={handleReactivate}
             />
             <Pagination
               page={pagination.page}
