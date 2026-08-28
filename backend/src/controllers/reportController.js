@@ -343,6 +343,71 @@ const ReportController = {
     }
   },
 
+  async suppliers(req, res, next) {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      const suppliers = await SupplierModel.findAll();
+
+      const doc = startPdf(res, `supplier-roster-${Date.now()}.pdf`);
+
+      drawHeader(doc, {
+        title: 'Supplier Roster',
+        subtitle: 'All suppliers on file',
+        generatedBy: user ? `${user.name} (${user.role})` : '',
+      });
+
+      drawSummary(doc, [
+        { label: 'Total Suppliers', value: String(suppliers.length) },
+      ]);
+
+      if (suppliers.length === 0) {
+        doc
+          .moveDown(2)
+          .font('Helvetica')
+          .fontSize(11)
+          .fillColor('#64748b')
+          .text('No suppliers on file.', { align: 'center' });
+      } else {
+        drawTable(doc, {
+          columns: [
+            { label: 'Name',    key: 'name',    width: 110 },
+            { label: 'Contact', key: 'contact', width: 100, format: (v) => v || '-' },
+            { label: 'Phone',   key: 'phone',   width: 90,  format: (v) => v || '-' },
+            { label: 'Email',   key: 'email',   width: 130, format: (v) => v || '-' },
+            { label: 'Address', key: 'address', width: 90,  format: (v) => v || '-' },
+          ],
+          rows: suppliers,
+        });
+      }
+
+      drawFooter(doc);
+      doc.end();
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async suppliersCsv(req, res, next) {
+    try {
+      const suppliers = await SupplierModel.findAll();
+
+      const csv = toCsv(
+        [
+          { label: 'Name', key: 'name' },
+          { label: 'Contact', key: 'contact', format: (v) => v || '' },
+          { label: 'Phone', key: 'phone', format: (v) => v || '' },
+          { label: 'Email', key: 'email', format: (v) => v || '' },
+          { label: 'Address', key: 'address', format: (v) => v || '' },
+        ],
+        suppliers
+      );
+
+      sendCsv(res, `supplier-roster-${Date.now()}.csv`, csv);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async auditLogs(req, res, next) {
     try {
       const user = await UserModel.findById(req.user.id);
