@@ -5,28 +5,36 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Tags, Package } from 'lucide-react';
+import { ArrowLeft, Tags, Package, Pencil, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { categoryApi } from '../api/categoryApi';
 import { productApi } from '../api/productApi';
+import { useAuth } from '../hooks/useAuth';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
 import Pagination from '../components/common/Pagination';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import ProductTable from '../components/products/ProductTable';
+import CategoryFormModal from '../components/categories/CategoryFormModal';
 import { formatDate } from '../utils/format';
 
 const PAGE_SIZE = 20;
 
 export default function CategoryDetail() {
   const { id } = useParams();
+  const { isAdmin } = useAuth();
 
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [products, setProducts] = useState([]);
   const [productPagination, setProductPagination] = useState({
@@ -58,6 +66,26 @@ export default function CategoryDetail() {
     };
     load();
   }, [id, productPage]);
+
+  const handleSave = async (payload) => {
+    await categoryApi.update(category.id, payload);
+    toast.success('Category updated');
+    setFormOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await categoryApi.remove(deleteTarget.id);
+      toast.success(`"${deleteTarget.name}" deleted`);
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -99,7 +127,30 @@ export default function CategoryDetail() {
         >
           <ArrowLeft size={14} /> Back to Categories
         </Link>
-        <h2 className="text-xl font-bold text-slate-900">{category.name}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-bold text-slate-900">{category.name}</h2>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={Pencil}
+                onClick={() => setFormOpen(true)}
+              >
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={Trash2}
+                onClick={() => setDeleteTarget(category)}
+                className="text-red-600 hover:bg-red-50"
+              >
+                Delete
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -133,6 +184,29 @@ export default function CategoryDetail() {
           </>
         )}
       </div>
+
+      <CategoryFormModal
+        open={formOpen}
+        mode="edit"
+        category={category}
+        onSave={handleSave}
+        onClose={() => setFormOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete category?"
+        message={
+          <>
+            Delete <strong>{deleteTarget?.name}</strong>? Products in this
+            category will be moved to "Uncategorized".
+          </>
+        }
+        confirmLabel="Delete"
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </DashboardLayout>
   );
 }
