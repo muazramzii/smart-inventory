@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   ArrowLeftRight,
   CalendarDays,
+  Truck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -45,6 +46,8 @@ export default function Reports() {
   const [loadingLowCsv, setLoadingLowCsv] = useState(false);
   const [loadingTx, setLoadingTx] = useState(false);
   const [loadingTxCsv, setLoadingTxCsv] = useState(false);
+  const [loadingSup, setLoadingSup] = useState(false);
+  const [loadingSupCsv, setLoadingSupCsv] = useState(false);
 
   // ---- Transaction filter state ----
   const [startDate, setStartDate] = useState('');
@@ -137,6 +140,30 @@ export default function Reports() {
       toast.error(err.response?.data?.message || 'Download failed');
     } finally {
       setLoadingTxCsv(false);
+    }
+  };
+
+  const downloadSuppliers = async () => {
+    setLoadingSup(true);
+    try {
+      await reportApi.suppliers();
+      toast.success('Supplier roster downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingSup(false);
+    }
+  };
+
+  const downloadSuppliersCsv = async () => {
+    setLoadingSupCsv(true);
+    try {
+      await reportApi.suppliersCsv();
+      toast.success('Supplier roster CSV downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Download failed');
+    } finally {
+      setLoadingSupCsv(false);
     }
   };
 
@@ -256,6 +283,18 @@ export default function Reports() {
             </select>
           </div>
         </ReportCard>
+
+        {/* Card 4: Supplier roster */}
+        <ReportCard
+          icon={Truck}
+          title="Supplier Roster"
+          description="All suppliers on file with their contact details."
+          accent="green"
+          loading={loadingSup}
+          onDownload={downloadSuppliers}
+          onDownloadCsv={downloadSuppliersCsv}
+          loadingCsv={loadingSupCsv}
+        />
       </div>
 
       {/* Tip box */}
