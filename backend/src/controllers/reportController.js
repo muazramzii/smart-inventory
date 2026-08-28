@@ -307,12 +307,13 @@ const ReportController = {
 
   async transactionsCsv(req, res, next) {
     try {
-      const { startDate, endDate, type } = req.query;
+      const { startDate, endDate, type, supplierId } = req.query;
 
       const { data: txs } = await TransactionModel.findAll({
         startDate: startDate || null,
         endDate: endDate || null,
         type: type || null,
+        supplierId: supplierId ? parseInt(supplierId, 10) : null,
         page: 1,
         limit: 1000,
       });
