@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Truck, Phone, Mail, MapPin, User, Inbox, Pencil, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -26,6 +26,7 @@ const PAGE_SIZE = 20;
 
 export default function SupplierDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
 
   const [supplier, setSupplier] = useState(null);
@@ -68,7 +69,8 @@ export default function SupplierDetail() {
   }, [id, txPage]);
 
   const handleSave = async (payload) => {
-    await supplierApi.update(supplier.id, payload);
+    const updated = await supplierApi.update(supplier.id, payload);
+    setSupplier(updated);
     toast.success('Supplier updated');
     setFormOpen(false);
   };
@@ -80,6 +82,7 @@ export default function SupplierDetail() {
       await supplierApi.remove(deleteTarget.id);
       toast.success(`"${deleteTarget.name}" deleted`);
       setDeleteTarget(null);
+      navigate('/suppliers');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Delete failed');
     } finally {
