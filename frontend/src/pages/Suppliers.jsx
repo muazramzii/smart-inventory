@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Truck, Phone, Mail, MapPin, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -176,7 +177,12 @@ function SupplierCard({ supplier, isAdmin, onEdit, onDelete }) {
             <Truck size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="truncate font-semibold text-slate-900">{s.name}</h3>
+            <Link
+              to={`/suppliers/${s.id}`}
+              className="block truncate font-semibold text-slate-900 hover:text-brand-600 hover:underline"
+            >
+              {s.name}
+            </Link>
             {s.contact && (
               <p className="flex items-center gap-1 text-xs text-slate-500">
                 <User size={11} />

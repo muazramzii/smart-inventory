@@ -13,6 +13,7 @@ import TransactionDetail from '../pages/TransactionDetail';
 import Reports from '../pages/Reports';
 import Categories from '../pages/Categories';
 import Suppliers from '../pages/Suppliers';
+import SupplierDetail from '../pages/SupplierDetail';
 import Profile from '../pages/Profile';
 import AuditLogs from '../pages/AuditLogs';
 import Users from '../pages/Users';
@@ -31,6 +32,7 @@ export default function AppRoutes() {
       <Route path="/transactions/:id" element={<PrivateRoute><TransactionDetail /></PrivateRoute>} />
       <Route path="/categories"   element={<PrivateRoute><Categories /></PrivateRoute>} />
       <Route path="/suppliers"    element={<PrivateRoute><Suppliers /></PrivateRoute>} />
+      <Route path="/suppliers/:id" element={<PrivateRoute><SupplierDetail /></PrivateRoute>} />
       <Route path="/reports"      element={<PrivateRoute><Reports /></PrivateRoute>} />
       <Route path="/profile"      element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/audit-logs"   element={<PrivateRoute requiredRole="admin"><AuditLogs /></PrivateRoute>} />
