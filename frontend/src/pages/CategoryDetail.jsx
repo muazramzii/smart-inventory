@@ -5,16 +5,21 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Tags } from 'lucide-react';
+import { ArrowLeft, Tags, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { categoryApi } from '../api/categoryApi';
+import { productApi } from '../api/productApi';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
+import Pagination from '../components/common/Pagination';
+import ProductTable from '../components/products/ProductTable';
 import { formatDate } from '../utils/format';
+
+const PAGE_SIZE = 20;
 
 export default function CategoryDetail() {
   const { id } = useParams();
@@ -23,13 +28,24 @@ export default function CategoryDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const [products, setProducts] = useState([]);
+  const [productPagination, setProductPagination] = useState({
+    page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0,
+  });
+  const [productPage, setProductPage] = useState(1);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setNotFound(false);
       try {
-        const c = await categoryApi.getOne(id);
+        const [c, prodResult] = await Promise.all([
+          categoryApi.getOne(id),
+          productApi.list({ categoryId: id, page: productPage, limit: PAGE_SIZE }),
+        ]);
         setCategory(c);
+        setProducts(prodResult.data);
+        setProductPagination(prodResult.pagination);
       } catch (err) {
         if (err.response?.status === 404) {
           setNotFound(true);
@@ -41,7 +57,7 @@ export default function CategoryDetail() {
       }
     };
     load();
-  }, [id]);
+  }, [id, productPage]);
 
   if (loading) {
     return (
@@ -92,6 +108,30 @@ export default function CategoryDetail() {
           <InfoRow label="Description" value={category.description || '—'} />
           <InfoRow label="Added On" value={formatDate(category.created_at)} />
         </dl>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Products</h3>
+        </div>
+        {products.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="No products in this category"
+            description="Products assigned to this category will appear here."
+          />
+        ) : (
+          <>
+            <ProductTable products={products} isAdmin={false} onEdit={() => {}} onDelete={() => {}} />
+            <Pagination
+              page={productPagination.page}
+              totalPages={productPagination.totalPages}
+              total={productPagination.total}
+              pageSize={productPagination.limit}
+              onChange={setProductPage}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
