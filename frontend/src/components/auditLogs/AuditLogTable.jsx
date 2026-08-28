@@ -1,6 +1,7 @@
 // src/components/auditLogs/AuditLogTable.jsx
 // ----------------------------------------------------------------------------
-// Read-only history table: when, who, what action, on which entity.
+// History table: when, who, what action, on which entity — the entity
+// reference links through to its detail page.
 // ----------------------------------------------------------------------------
 
 import { Link } from 'react-router-dom';
@@ -39,13 +40,7 @@ export default function AuditLogTable({ logs }) {
                 </Td>
                 <Td>
                   <span className="text-slate-600">
-                    {log.entity ? (
-                      <Link to={entityDetailPath(log.entity, log.entity_id)}>
-                        {log.entity} #{log.entity_id}
-                      </Link>
-                    ) : (
-                      '—'
-                    )}
+                    <EntityRef entity={log.entity} entityId={log.entity_id} />
                   </span>
                 </Td>
                 <Td>
@@ -77,7 +72,10 @@ export default function AuditLogTable({ logs }) {
             <p className="text-sm text-slate-900">
               {log.user_name || 'Unknown user'}
               {log.entity && (
-                <span className="text-slate-500"> · {log.entity} #{log.entity_id}</span>
+                <span className="text-slate-500">
+                  {' '}
+                  · <EntityRef entity={log.entity} entityId={log.entity_id} />
+                </span>
               )}
             </p>
             {log.details && (
@@ -89,6 +87,17 @@ export default function AuditLogTable({ logs }) {
         ))}
       </ul>
     </>
+  );
+}
+
+function EntityRef({ entity, entityId }) {
+  if (!entity) return '—';
+  const path = entityDetailPath(entity, entityId);
+  if (!path) return `${entity} #${entityId}`;
+  return (
+    <Link to={path}>
+      {entity} #{entityId}
+    </Link>
   );
 }
 
