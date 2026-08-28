@@ -36,6 +36,7 @@ export default function Products() {
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState(null);
   const [lowStockOnly, setLowStockOnly] = useState(() => searchParams.get('lowStockOnly') === 'true');
+  const [showInactive, setShowInactive] = useState(false);
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search, 300);
 
@@ -76,6 +77,7 @@ export default function Products() {
         search: debouncedSearch || undefined,
         categoryId: categoryId || undefined,
         lowStockOnly: lowStockOnly ? 'true' : undefined,
+        includeInactive: isAdmin && showInactive ? 'true' : undefined,
         page,
         limit: PAGE_SIZE,
       });
@@ -91,7 +93,7 @@ export default function Products() {
   useEffect(() => {
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, categoryId, lowStockOnly, page]);
+  }, [debouncedSearch, categoryId, lowStockOnly, showInactive, page]);
 
   // Reset to page 1 whenever a filter changes
   useEffect(() => {
@@ -178,6 +180,8 @@ export default function Products() {
             onCategoryChange={setCategoryId}
             lowStockOnly={lowStockOnly}
             onLowStockChange={setLowStockOnly}
+            showInactive={showInactive}
+            onShowInactiveChange={isAdmin ? setShowInactive : undefined}
             categories={categories}
           />
         </div>
