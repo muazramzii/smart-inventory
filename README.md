@@ -28,7 +28,7 @@ A modern, production-quality inventory management web application designed for s
 - 👤 **User profile** — Account info, password change with strength meter
 - 🧑‍💼 **User management** — Admin-only account creation, role assignment, activate/deactivate, and password reset
 - 🪪 **User detail page** — Account info, recent activity preview, and admin actions in one place
-- 🕵️ **Audit logs** — Admin-only trail of logins, password changes, product edits, and stock movements, filterable by user with a direct link from the Users page, exportable as PDF or CSV
+- 🕵️ **Audit logs** — Admin-only trail of logins, password changes, product edits, and stock movements, filterable by user with a direct link from the Users page, exportable as PDF or CSV; entity references link straight to the record's detail page
 - 📱 **Fully responsive** — Works beautifully on mobile, tablet, and desktop
 
 ---
