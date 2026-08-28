@@ -65,13 +65,14 @@ export const reportApi = {
     );
   },
 
-  transactions({ startDate, endDate, type } = {}) {
+  transactions({ startDate, endDate, type, supplierId } = {}) {
     return downloadPdf(
       '/reports/transactions.pdf',
       {
         ...(startDate && { startDate }),
         ...(endDate && { endDate }),
         ...(type && { type }),
+        ...(supplierId && { supplierId }),
       },
       `transactions-report-${stamp()}.pdf`
     );
@@ -93,13 +94,14 @@ export const reportApi = {
     );
   },
 
-  transactionsCsv({ startDate, endDate, type } = {}) {
+  transactionsCsv({ startDate, endDate, type, supplierId } = {}) {
     return downloadCsv(
       '/reports/transactions.csv',
       {
         ...(startDate && { startDate }),
         ...(endDate && { endDate }),
         ...(type && { type }),
+        ...(supplierId && { supplierId }),
       },
       `transactions-report-${stamp()}.csv`
     );

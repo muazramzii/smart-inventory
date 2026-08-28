@@ -6,7 +6,7 @@
 //   3. Transaction history (date range + type filters with quick presets)
 // ----------------------------------------------------------------------------
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FileSpreadsheet,
   AlertTriangle,
@@ -16,6 +16,7 @@ import {
 import toast from 'react-hot-toast';
 
 import { reportApi } from '../api/reportApi';
+import { supplierApi } from '../api/supplierApi';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ReportCard from '../components/reports/ReportCard';
 
@@ -51,6 +52,10 @@ export default function Reports() {
   const [txType, setTxType] = useState('');
   const [txSupplierId, setTxSupplierId] = useState('');
   const [suppliers, setSuppliers] = useState([]);
+
+  useEffect(() => {
+    supplierApi.list().then(setSuppliers).catch(() => {});
+  }, []);
 
   // ---- Handlers ----
   const downloadInventory = async () => {
