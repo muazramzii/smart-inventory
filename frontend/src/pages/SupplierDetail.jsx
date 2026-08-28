@@ -5,16 +5,21 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Truck, Phone, Mail, MapPin, User } from 'lucide-react';
+import { ArrowLeft, Truck, Phone, Mail, MapPin, User, Inbox } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { supplierApi } from '../api/supplierApi';
+import { transactionApi } from '../api/transactionApi';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Loader from '../components/common/Loader';
 import EmptyState from '../components/common/EmptyState';
 import Button from '../components/common/Button';
+import Pagination from '../components/common/Pagination';
+import TransactionTable from '../components/transactions/TransactionTable';
 import { formatDate } from '../utils/format';
+
+const PAGE_SIZE = 20;
 
 export default function SupplierDetail() {
   const { id } = useParams();
@@ -23,13 +28,24 @@ export default function SupplierDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const [transactions, setTransactions] = useState([]);
+  const [txPagination, setTxPagination] = useState({
+    page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0,
+  });
+  const [txPage, setTxPage] = useState(1);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setNotFound(false);
       try {
-        const s = await supplierApi.getOne(id);
+        const [s, txResult] = await Promise.all([
+          supplierApi.getOne(id),
+          transactionApi.list({ supplierId: id, page: txPage, limit: PAGE_SIZE }),
+        ]);
         setSupplier(s);
+        setTransactions(txResult.data);
+        setTxPagination(txResult.pagination);
       } catch (err) {
         if (err.response?.status === 404) {
           setNotFound(true);
@@ -41,7 +57,7 @@ export default function SupplierDetail() {
       }
     };
     load();
-  }, [id]);
+  }, [id, txPage]);
 
   if (loading) {
     return (
@@ -95,6 +111,35 @@ export default function SupplierDetail() {
           <InfoRow icon={MapPin} label="Address" value={supplier.address || '—'} />
           <InfoRow label="Added On" value={formatDate(supplier.created_at)} />
         </dl>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Transaction History</h3>
+        </div>
+        {transactions.length === 0 ? (
+          <EmptyState
+            icon={Inbox}
+            title="No transactions yet"
+            description="Stock movements involving this supplier will appear here."
+          />
+        ) : (
+          <>
+            <TransactionTable
+              transactions={transactions}
+              isAdmin={false}
+              onReverse={() => {}}
+              hideProductColumn
+            />
+            <Pagination
+              page={txPagination.page}
+              totalPages={txPagination.totalPages}
+              total={txPagination.total}
+              pageSize={txPagination.limit}
+              onChange={setTxPage}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
