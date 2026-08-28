@@ -3,7 +3,9 @@
 // Read-only history table: when, who, what action, on which entity.
 // ----------------------------------------------------------------------------
 
+import { Link } from 'react-router-dom';
 import { formatDateTime } from '../../utils/format';
+import { entityDetailPath } from '../../utils/auditEntityLink';
 
 export default function AuditLogTable({ logs }) {
   return (
@@ -37,7 +39,13 @@ export default function AuditLogTable({ logs }) {
                 </Td>
                 <Td>
                   <span className="text-slate-600">
-                    {log.entity ? `${log.entity} #${log.entity_id}` : '—'}
+                    {log.entity ? (
+                      <Link to={entityDetailPath(log.entity, log.entity_id)}>
+                        {log.entity} #{log.entity_id}
+                      </Link>
+                    ) : (
+                      '—'
+                    )}
                   </span>
                 </Td>
                 <Td>
