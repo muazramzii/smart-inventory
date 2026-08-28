@@ -1,11 +1,10 @@
 USE smart_inventory;
 
 -- ---- Users ----
--- Replace the two hashes below with the output from your bcrypt one-liner
 -- Plain passwords: Admin@123 and Staff@123
 INSERT INTO users (name, email, password_hash, role) VALUES
-  ('System Admin', 'admin@inventory.local', '4b6aa25db23609a78fc4f9d2e0744f0e7bc2a0568b58d3e643fb47b60feee4453c5904585a044531a58b1b0531263db8', 'admin'),
-  ('Jane Staff',   'staff@inventory.local', '4b6aa25db23609a78fc4f9d2e0744f0e7bc2a0568b58d3e643fb47b60feee4453c5904585a044531a58b1b0531263db8cd', 'staff');
+  ('System Admin', 'admin@inventory.local', '$2a$10$VyjL81vi4LaTUshdom3x2e0yUhGkr6l7vVQ89C.ySS0UZzYn2AVSq', 'admin'),
+  ('Jane Staff',   'staff@inventory.local', '$2a$10$ew4LW10W7/v6PxXa6k6JO.FQWznBMTA36Cg3wM2A.DellcJPbDeju', 'staff');
 
 -- ---- Categories ----
 INSERT INTO categories (name, description) VALUES
