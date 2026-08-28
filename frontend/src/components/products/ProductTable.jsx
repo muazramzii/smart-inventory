@@ -143,12 +143,19 @@ export default function ProductTable({
             <li key={p.id} className="px-4 py-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <Link
-                    to={`/products/${p.id}`}
-                    className="block font-medium text-slate-900 hover:text-brand-600 hover:underline"
-                  >
-                    {p.name}
-                  </Link>
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      to={`/products/${p.id}`}
+                      className="truncate font-medium text-slate-900 hover:text-brand-600 hover:underline"
+                    >
+                      {p.name}
+                    </Link>
+                    {!p.is_active && (
+                      <span className="inline-flex flex-shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
                   <p className="font-mono text-xs text-slate-500">{p.sku}</p>
                   {p.category_name && (
                     <p className="mt-0.5 text-xs text-slate-500">
@@ -177,23 +184,36 @@ export default function ProductTable({
               </div>
               {isAdmin && (
                 <div className="mt-2 flex justify-end gap-1">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    icon={Pencil}
-                    onClick={() => onEdit(p)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    icon={Trash2}
-                    onClick={() => onDelete(p)}
-                    className="text-red-600 hover:bg-red-50"
-                  >
-                    Delete
-                  </Button>
+                  {p.is_active ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        icon={Pencil}
+                        onClick={() => onEdit(p)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        icon={Trash2}
+                        onClick={() => onDelete(p)}
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        Delete
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      icon={RotateCcw}
+                      onClick={() => onReactivate(p)}
+                    >
+                      Reactivate
+                    </Button>
+                  )}
                 </div>
               )}
             </li>
